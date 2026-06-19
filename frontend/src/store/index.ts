@@ -17,6 +17,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   login: (user, accessToken, refreshToken) => {
     localStorage.setItem("access_token", accessToken);
     localStorage.setItem("refresh_token", refreshToken);
+    localStorage.setItem("student_name", user.full_name);
     set({
       user,
       accessToken,

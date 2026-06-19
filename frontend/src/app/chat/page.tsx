@@ -8,9 +8,9 @@ import type { Language } from "@/types";
 const API = "http://localhost:8000/api/v1";
 
 const WELCOME: Record<Language, string> = {
-  en: "Hi! I'm your math tutor. What would you like to learn today? 😊",
-  hi: "नमस्ते! मैं आपका गणित टीचर हूँ। आज क्या सीखना चाहोगे? 😊",
-  bn: "নমস্কার! আমি তোমার গণিত শিক্ষক। আজ কী শিখতে চাও? 😊",
+  en: "Hi {name}! I'm your math tutor. What would you like to learn today? 😊",
+  hi: "नमस्ते {name}! मैं आपका गणित टीचर हूँ। आज क्या सीखना चाहोगे? 😊",
+  bn: "নমস্কার {name}! আমি তোমার গণিত শিক্ষক। আজ কী শিখতে চাও? 😊",
 };
 
 interface ChatMsg {
@@ -33,11 +33,26 @@ export default function ChatPage() {
   const [lastQuestion, setLastQuestion] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Get token on mount
+  // Get token + student info on mount
   useEffect(() => {
     const t = localStorage.getItem("access_token");
+    const name = localStorage.getItem("student_name") || "";
     setToken(t);
-    setMessages([{ id: "w0", role: "teacher", content: WELCOME[language], type: "greeting" }]);
+    const welcome = WELCOME[language];
+    setMessages([{ id: "w0", role: "teacher", content: name ? welcome.replace("{name}", name) : welcome.replace("{name}, ", "").replace(" {name}!", "!"), type: "greeting" }]);
+    
+    // Load student name from API if not cached
+    if (t && !name) {
+      (async () => {
+        try {
+          const res = await fetch(`${API}/auth/me`, { headers: { Authorization: `Bearer ${t}` } });
+          if (res.ok) {
+            const user = await res.json();
+            localStorage.setItem("student_name", user.full_name);
+          }
+        } catch {}
+      })();
+    }
   }, []);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
@@ -190,7 +205,7 @@ export default function ChatPage() {
         <div className="flex items-center justify-between px-4 py-3">
           <button onClick={() => router.push("/dashboard")} className="btn-ghost text-sm">← Back</button>
           <div className="text-center"><h1 className="font-heading font-bold text-gray-800">GanitMitra</h1></div>
-          <select value={language} onChange={(e) => { setLanguage(e.target.value as Language); setMessages([{ id: "w0", role: "teacher", content: WELCOME[e.target.value as Language], type: "greeting" }]); }} className="text-sm bg-gray-50 rounded-lg px-2 py-1 border-0">
+          <select value={language} onChange={(e) => { const lang = e.target.value as Language; setLanguage(lang); const name = localStorage.getItem("student_name") || ""; const w = WELCOME[lang]; setMessages([{ id: "w0", role: "teacher", content: name ? w.replace("{name}", name) : w.replace("{name}, ", "").replace(" {name}!", "!"), type: "greeting" }]); }} className="text-sm bg-gray-50 rounded-lg px-2 py-1 border-0">
             <option value="en">🇬🇧 EN</option><option value="hi">🇮🇳 हिंदी</option><option value="bn">🇧🇩 বাংলা</option>
           </select>
         </div>

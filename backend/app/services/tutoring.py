@@ -380,9 +380,9 @@ Respond with exactly ONE word: greeting, learn, or progress.""" },
             student_name = user.full_name
 
         greetings = {
-            "en": f"Hi {student_name or 'there'}! Ready to learn some math today? What would you like to practice? 😊",
-            "hi": f"नमस्ते {student_name or 'दोस्त'}! आज क्या सीखना चाहोगे? 😊",
-            "bn": f"নমস্কার {student_name or 'বন্ধু'}! আজ কী শিখতে চাও? 😊",
+            "en": f"Hi {student_name}! Ready to learn some math today? What would you like to practice? 😊",
+            "hi": f"नमस्ते {student_name}! आज क्या सीखना चाहोगे? 😊",
+            "bn": f"নমস্কার {student_name}! আজ কী শিখতে চাও? 😊",
         }
 
         content = greetings.get(language, greetings["en"])
