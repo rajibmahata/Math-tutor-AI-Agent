@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     # Application
     # =========================================================================
     app_name: str = Field(default="GanitMitra", alias="APP_NAME")
-    app_version: str = Field(default="0.1.0", alias="APP_VERSION")
+    app_version: str = Field(default="1.0.0", alias="APP_VERSION")
     app_env: Environment = Field(default=Environment.DEVELOPMENT, alias="APP_ENV")
     debug: bool = Field(default=True, alias="DEBUG")
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")

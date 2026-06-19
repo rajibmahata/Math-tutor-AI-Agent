@@ -3,9 +3,9 @@ import { Toaster } from "sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "GanitMitra — Your Math Friend",
+  title: "GanitMitra — AI Math Tutor | v1.0",
   description:
-    "AI-powered multilingual math learning companion for Nursery to Class 10 students. Learn math in English, Hindi, or Bengali.",
+    "Production-ready AI-powered multilingual math learning companion for Nursery to Class 10. 8 AI agents, 3 languages, voice support.",
   keywords: [
     "math tutor",
     "AI math learning",

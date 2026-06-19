@@ -115,7 +115,7 @@ cd backend && uvicorn app.main:app --reload  # FastAPI :8000
 
 ## Status
 
-🟢 **Phase 3: Testing & QA** — All phases complete. Runnable locally under Docker.
+🟢 **v1.0 — Production Ready** — All features complete. Running at http://localhost:3000
 
 ---
 

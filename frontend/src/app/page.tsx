@@ -15,32 +15,24 @@ export default function HomePage() {
           Your AI Math Friend — Learning in English, Hindi & Bengali
         </p>
 
-        {/* Status */}
+        {/* Status — Production Ready */}
         <div className="card mb-8">
           <div className="flex items-center gap-3 justify-center">
             <span className="relative flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-500 opacity-75" />
               <span className="relative inline-flex rounded-full h-3 w-3 bg-success-500" />
             </span>
-            <span className="text-sm text-gray-500">Phase 0 — Foundation Complete</span>
+            <span className="text-sm text-gray-500">v1.0 — Production Ready</span>
           </div>
         </div>
 
         {/* Quick Links */}
         <div className="flex flex-wrap gap-3 justify-center">
-          <a
-            href="/login"
-            className="btn-primary"
-          >
+          <a href="/login" className="btn-primary">
             Start Learning →
           </a>
-          <a
-            href="https://github.com/rajibmahata/Math-tutor-AI-Agent"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-secondary"
-          >
-            View on GitHub
+          <a href="/signup" className="btn-secondary">
+            Create Account
           </a>
         </div>
 
@@ -62,6 +54,37 @@ export default function HomePage() {
             <p className="text-sm text-gray-500">Full K-10 math</p>
           </div>
         </div>
+
+        {/* More Features */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+          <div className="card text-center py-3">
+            <div className="text-xl mb-1">🎤</div>
+            <p className="text-xs text-gray-500">Voice Ready</p>
+          </div>
+          <div className="card text-center py-3">
+            <div className="text-xl mb-1">🔐</div>
+            <p className="text-xs text-gray-500">Secure Auth</p>
+          </div>
+          <div className="card text-center py-3">
+            <div className="text-xl mb-1">📊</div>
+            <p className="text-xs text-gray-500">Progress Tracking</p>
+          </div>
+          <div className="card text-center py-3">
+            <div className="text-xl mb-1">👨‍👩‍👧</div>
+            <p className="text-xs text-gray-500">Parent Reports</p>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <p className="text-xs text-gray-400 mt-12">
+          <a href="https://github.com/rajibmahata/Math-tutor-AI-Agent" target="_blank" rel="noopener noreferrer" className="hover:text-primary-500 transition-colors">
+            GitHub
+          </a>
+          {" · "}
+          <a href="http://localhost:8000/api/docs" target="_blank" rel="noopener noreferrer" className="hover:text-primary-500 transition-colors">
+            API Docs
+          </a>
+        </p>
       </div>
     </main>
   );
