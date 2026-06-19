@@ -1,402 +1,381 @@
-# Architecture Diagrams
+# Architecture Diagrams — VidyaMitra v2.0
 
-> **Date:** 2026-06-19
-> **Format:** Mermaid (renders on GitHub)
+> **Date:** 2026-06-19 | **Version:** 2.0 | **Format:** Mermaid (renders on GitHub)
 
 ---
 
-## 1. System Architecture
+## 1. System Architecture (v2.0 — Multi-Role)
 
 ```mermaid
 graph TB
-    subgraph Client["CLIENT LAYER"]
-        Web["Next.js SSR\n(Desktop)"]
-        PWA["PWA\n(Mobile)"]
-        Voice["Voice Interface\n(STT/TTS)"]
+    subgraph Client["CLIENT LAYER — 4 Portals"]
+        StudentP["Student Portal\n(Learning, Chat, Practice)"]
+        TutorP["Tutor Portal\n(Review, Students, Feedback)"]
+        PrincipalP["Principal Portal\n(Monitor, Quality, Reports)"]
+        AdminP["Admin Portal\n(Governance, Users, Analytics)"]
     end
 
     subgraph Gateway["API GATEWAY"]
-        Nginx["Nginx\n(Reverse Proxy + TLS)"]
-        FastAPI["FastAPI\n(Uvicorn Workers)"]
-        WS["WebSocket\nHandler"]
+        Nginx["Nginx (TLS 1.3)"]
+        FastAPI["FastAPI (Uvicorn Workers)"]
+        WS["WebSocket Handler"]
+        Auth["JWT Auth\n(4 Roles)"]
     end
 
     subgraph Services["SERVICE LAYER"]
-        Tutoring["Tutoring\nService"]
-        Assessment["Assessment\nService"]
-        Practice["Practice\nService"]
-        Analytics["Analytics\nService"]
-        Student["Student Profile\nService"]
-        Curriculum["Curriculum\nService"]
-        Report["Report\nService"]
+        LearnSvc["Learning\nService"]
+        AssessSvc["Assessment\nService"]
+        ContentSvc["Content\nGenerator"]
+        ReviewSvc["Content\nReview"]
+        VerifySvc["Verification\nService"]
+        MatchSvc["Matching\nService"]
+        AnalyticsSvc["Analytics\nService"]
         VoiceSvc["Voice\nService"]
     end
 
-    subgraph AI["AI AGENT LAYER"]
+    subgraph AI["AI AGENT LAYER — 12 Agents"]
         Orch["LangGraph\nOrchestrator"]
-        Teacher["Teacher\nAgent"]
-        AssessA["Assessment\nAgent"]
-        CurricA["Curriculum\nAgent"]
-        PractA["Practice\nAgent"]
-        MotivA["Motivation\nAgent"]
-        AnalytA["Analytics\nAgent"]
-        ParentA["Parent Report\nAgent"]
-        VoiceA["Voice\nAgent"]
+        Teacher["1. Teacher\nAgent"]
+        AssessA["2. Assessment\nAgent"]
+        CurricA["3. Curriculum\nAgent"]
+        MotivA["4. Motivation\nAgent"]
+        ContentA["5. Content Gen\nAgent"]
+        PersonalA["6. Personalize\nAgent"]
+        VideoA["7. Video Gen\nAgent"]
+        VerifyA["8. Verification\nAgent"]
+        VoiceA["9. Voice\nAgent"]
+        MatchA["10. Matching\nAgent"]
+        AnalyticsA["11. Analytics\nAgent"]
+        ReportA["12. Report\nAgent"]
         Router["Model\nRouter"]
     end
 
     subgraph Models["MODEL LAYER"]
-        GPT4o["GPT-4o\n(Reasoning)"]
-        GPT4oMini["GPT-4o-mini\n(Fast Chat)"]
-        DeepSeek["DeepSeek V4\n(Math)"]
-        Whisper["Whisper\n(STT)"]
-        ElevenLabs["ElevenLabs\n(TTS)"]
-        SymPy["SymPy\n(Verify)"]
+        GPT4o["GPT-4o"]
+        GPT4oMini["GPT-4o-mini"]
+        DeepSeek["DeepSeek V4"]
+        Whisper["Whisper (STT)"]
+        TTS["ElevenLabs/Azure (TTS)"]
+        SymPy["SymPy (Math)"]
+        OCR["Tesseract (OCR)"]
     end
 
     subgraph Data["DATA LAYER"]
-        PG["PostgreSQL\n(Primary DB)"]
-        Redis["Redis\n(Cache/Sessions)"]
+        PG["PostgreSQL 16"]
+        Redis["Redis 7"]
         Qdrant["Qdrant\n(Vector DB)"]
+        MinIO["MinIO / S3\n(Files)"]
+        RabbitMQ["RabbitMQ\n(Async Tasks)"]
     end
 
     subgraph Observe["OBSERVABILITY"]
         Langfuse["Langfuse\n(LLM Trace)"]
-        Prometheus["Prometheus\n(Metrics)"]
-        Grafana["Grafana\n(Dashboards)"]
+        Prometheus["Prometheus"]
+        Grafana["Grafana"]
     end
 
-    Web --> Nginx
-    PWA --> Nginx
-    Voice --> Nginx
-    Nginx --> FastAPI
-    Nginx --> WS
+    StudentP & TutorP & PrincipalP & AdminP --> Nginx
+    Nginx --> Auth
+    Auth --> FastAPI
+    FastAPI --> WS
     FastAPI --> Services
     Services --> AI
-    Orch --> Teacher & AssessA & CurricA & PractA & MotivA & AnalytA
-    ParentA -.-> Orch
-    VoiceA -.-> Orch
+    Orch --> Teacher & AssessA & CurricA & MotivA & ContentA & PersonalA & VideoA & VerifyA
+    Orch --> VoiceA & MatchA & AnalyticsA & ReportA
     AI --> Router
     Router --> GPT4o & GPT4oMini & DeepSeek
-    VoiceSvc --> Whisper & ElevenLabs
-    AssessA --> SymPy
-    Services --> PG
-    Services --> Redis
-    CurricA --> Qdrant
+    VoiceSvc --> Whisper & TTS
+    AssessA --> SymPy & OCR
+    ContentA --> GPT4o
+    Services --> PG & Redis
+    CurricA & ContentA --> Qdrant
+    ContentSvc --> MinIO
+    ContentSvc --> RabbitMQ
     AI --> Langfuse
-    FastAPI --> Prometheus
-    Prometheus --> Grafana
+    FastAPI --> Prometheus --> Grafana
 ```
 
 ---
 
-## 2. Multi-Agent Workflow
+## 2. Content Generation Pipeline
 
 ```mermaid
 flowchart TD
-    Student["👤 Student Message"] --> Classify["🎯 Intent Classifier"]
+    Upload["📄 Admin Uploads PDF/Notes"] --> Extract["Step 1: Extract Content\n(PyMuPDF + OCR)"]
+    Extract --> Embed["Step 2: Create Embeddings\n(text-embedding-3-small)"]
+    Embed --> Store["Store in Qdrant\nVector Database"]
+    Store --> GenLesson["Step 3: Generate Lessons\n(GPT-4o)"]
+    GenLesson --> GenVideo["Step 4: Generate Video\n+ Voice Narration"]
+    GenVideo --> Personalize["Step 5: Personalize\n(Language, Region, Culture, Grade)"]
+    Personalize --> TutorReview{"Step 6: Tutor Review"}
+    TutorReview -->|"Approve ✅"| Publish["📚 Published to\nKnowledge Base"]
+    TutorReview -->|"Modify ✏️"| GenLesson
+    TutorReview -->|"Reject ❌"| Rejected["Returned to Admin"]
+    Publish --> Student["👩‍🎓 Student Accesses\nPersonalized Content"]
+```
 
-    Classify -->|"learn"| Teacher["🧑‍🏫 Teacher Agent\nHint → Guide → Solve"]
-    Classify -->|"practice"| Practice["✏️ Practice Agent\nGenerate Quiz"]
-    Classify -->|"progress"| Analytics["📊 Analytics Agent\nCompute Progress"]
-    Classify -->|"greeting"| Format["💬 Format Response"]
+---
 
-    Teacher -->|"student answers"| Assessment["✅ Assessment Agent\nEvaluate + Detect Misconception"]
-    Teacher -->|"just a hint"| Format
+## 3. Tutor Approval Workflow
 
-    Assessment -->|"answered"| Motivation["🎯 Motivation Agent\nEncourage + Celebrate"]
-    Assessment -->|"wrong answer\nneeds context"| Curriculum["📚 Curriculum Agent\nRAG Retrieval"]
-    Curriculum --> Teacher
+```mermaid
+flowchart TD
+    Register["📝 Tutor Registration\n(Personal + Professional + Documents)"] --> AIVerify["🤖 AI Verification Agent\n(OCR Docs → Cross-reference → Report)"]
+    AIVerify --> PrincipalReview{"👨‍💼 Principal Review\n(Check AI Report + Suitability)"}
+    PrincipalReview -->|"Approve"| AdminApproval{"⚡ Super Admin Approval\n(Final Decision)"}
+    PrincipalReview -->|"Reject"| Rejected["❌ Rejected\n(With Reason)"]
+    PrincipalReview -->|"Need Info"| MoreInfo["📋 Request More\nInformation"]
+    MoreInfo --> Register
+    AdminApproval -->|"Approve"| Activated["✅ Tutor Activated\n(Dashboard + Students Access)"]
+    AdminApproval -->|"Reject"| Rejected
+```
 
-    Motivation --> StudentTwin["👤 Update Student Twin"]
-    Motivation --> Format
+---
 
-    Practice --> Format
-    Analytics --> Format
+## 4. Student Learning Journey (8 Steps)
 
-    Format --> Response["📤 Response to Student"]
+```mermaid
+flowchart TD
+    S1["Step 1: Subject Selection\n(Subject → Chapter → Topic)"] --> S2["Step 2: Personalized Content\n(Text + Audio + Video)"]
+    S2 --> S3["Step 3: Voice-Based Learning\n(Ask Questions → AI Responds)"]
+    S3 --> S4["Step 4: Chapter Learning\n(Videos + Exercises + Practice)"]
+    S4 --> S5["Step 5: Mock Test\n(MCQ + Short Answer + Subjective)"]
+    S5 --> S6["Step 6: Personalized Revision\n(AI Identifies Weak Areas)"]
+    S6 --> S7["Step 7: Final Assessment\n(Comprehensive Evaluation)"]
+    S7 --> S8["Step 8: Progress Dashboard\n(Scores + Badges + Streaks)"]
+    S8 --> S1
+```
 
-    subgraph Scheduled["⏰ Scheduled (Cron)"]
-        ParentReport["📄 Parent Report Agent\nWeekly Report Generation"]
-        TwinUpdate["🔄 Twin Updater\nPost-Session Async"]
+---
+
+## 5. Assessment Engine Architecture
+
+```mermaid
+flowchart TD
+    subgraph Objective["Objective Assessment"]
+        MCQ["MCQ"] --> AutoGrade["Auto-Graded\n(SymPy + Rule Engine)"]
+        FillBlanks["Fill in Blanks"] --> AutoGrade
+        Match["Match Following"] --> AutoGrade
     end
 
-    ParentReport --> Notification["📧 Parent Notification"]
+    subgraph Subjective["Subjective Assessment"]
+        Write["Student Writes on Paper"] --> Upload["Upload Image"]
+        Draw["Draws Diagrams"] --> Upload
+        Upload --> OCR["OCR Processing\n(Tesseract / Azure)"]
+        OCR --> AIEval["AI Evaluation\n(GPT-4o)"]
+        AIEval --> AIScore["AI Score + Feedback"]
+    end
+
+    AutoGrade --> Report["Assessment Report"]
+    AIScore --> Report
+    Report --> TutorFB["👨‍🏫 Tutor Review\n(Additional Feedback)"]
+    TutorFB --> Final["Final Score + Feedback\n(AI + Tutor Combined)"]
 ```
 
 ---
 
-## 3. Data Flow: Tutoring Session
-
-```mermaid
-sequenceDiagram
-    actor S as Student
-    participant FE as Next.js Frontend
-    participant API as FastAPI
-    participant O as LangGraph Orchestrator
-    participant TA as Teacher Agent
-    participant AA as Assessment Agent
-    participant CA as Curriculum Agent
-    participant MR as Model Router
-    participant LLM as LLM (DeepSeek/GPT)
-    participant SP as SymPy
-    participant DB as PostgreSQL
-    participant R as Redis
-
-    S->>FE: Ask math question
-    FE->>API: POST /sessions (WS connect)
-    API->>DB: Load Student Twin
-    DB-->>API: Student profile
-    API->>R: Cache session state
-    API->>O: Route to Orchestrator
-
-    O->>O: Classify Intent
-    O->>CA: Get curriculum context
-    CA->>DB: Search topic knowledge
-    DB-->>CA: Topic + prerequisites
-    CA-->>O: Curriculum context
-
-    O->>TA: Generate hint
-    TA->>MR: Route to LLM (DeepSeek V4)
-    MR->>LLM: Generate hint
-    LLM-->>MR: Hint response
-    MR-->>TA: Hint
-    TA-->>O: Hint ready
-    O-->>API: Response
-    API-->>FE: Hint (WebSocket)
-    FE-->>S: Display hint
-
-    S->>FE: Submit answer ("60")
-    FE->>API: WS: student answer
-    API->>O: Route to Assessment
-
-    O->>AA: Evaluate answer
-    AA->>SP: Verify 12×5=60
-    SP-->>AA: True
-    AA->>MR: Classify correctness + misconception
-    MR->>LLM: DeepSeek V4
-    LLM-->>AA: Correct, no misconception
-    AA-->>O: is_correct=true
-
-    O->>DB: Update Student Twin
-    O->>DB: Save session message
-    O->>API: Response
-    API-->>FE: Feedback + motivation
-    FE-->>S: "⭐ Bilkul sahi! +10 points"
-```
-
----
-
-## 4. Model Routing Decision Tree
+## 6. Multi-Agent Orchestration Flow
 
 ```mermaid
 flowchart TD
-    Task["Incoming Task"] --> Classify["Task Classifier"]
+    Student["👤 Student Input"] --> Intent["🎯 Intent Classifier"]
 
-    Classify --> Type1{"Task Type?"}
+    Intent -->|"learn"| Teacher["1. Teacher Agent\n(Hint → Guide → Solve)"]
+    Intent -->|"answer"| Assessment["2. Assessment Agent\n(Evaluate + Score)"]
+    Intent -->|"browse"| Curriculum["3. Curriculum Agent\n(Subject → Topic)"]
+    Intent -->|"progress"| Analytics["11. Analytics Agent\n(Patterns + Trends)"]
 
-    Type1 -->|"greeting/encouragement"| Fast["GPT-4o-mini\nFast + Cheap"]
-    Type1 -->|"intent classification"| Fast2["GPT-4o-mini\nLow temp"]
-    Type1 -->|"hint generation"| Fast3["GPT-4o-mini\nMed temp"]
-    Type1 -->|"step-by-step solution"| Reason["DeepSeek V4 / GPT-4o\nStrong Reasoning"]
-    Type1 -->|"answer evaluation"| Reason2["DeepSeek V4\n+ SymPy verify"]
-    Type1 -->|"misconception detection"| Reason3["GPT-4o\nAnalysis"]
-    Type1 -->|"question generation"| Fast4["GPT-4o-mini\n+ SymPy batch verify"]
-    Type1 -->|"report generation"| Reason4["GPT-4o\nStructured output"]
-    Type1 -->|"translation"| Multi["GPT-4o-mini\nMultilingual native"]
-    Type1 -->|"curriculum search"| Fast5["GPT-4o-mini\n+ Qdrant RAG"]
+    Teacher -->|"needs context"| Curriculum
+    Teacher -->|"wrong answer"| Assessment
+    Assessment -->|"encourage"| Motivation["4. Motivation Agent\n(Streaks + Badges)"]
+    Assessment -->|"weak area"| Curriculum
 
-    Reason --> Fallback{"Primary OK?"}
-    Reason2 --> Fallback
-    Reason3 --> Fallback
-    Reason4 --> Fallback
-    Fast --> Done["Return Response"]
-    Fast2 --> Done
-    Fast3 --> Done
-    Fast4 --> Done
-    Fast5 --> Done
-    Multi --> Done
+    Curriculum --> Response["📤 Response to Student"]
 
-    Fallback -->|"yes"| Done
-    Fallback -->|"no"| FB2["Fallback: GPT-4o"]
-    FB2 -->|"ok"| Done
-    FB2 -->|"no"| FB3["Fallback: Claude Sonnet"]
-    FB3 -->|"ok"| Done
-    FB3 -->|"no"| Cache["Return Cached/Error"]
+    subgraph Pipeline["Background Pipeline Agents"]
+        ContentGen["5. Content Gen Agent\n(PDF → Lessons)"]
+        Personalize["6. Personalize Agent\n(Language/Region/Culture)"]
+        VideoGen["7. Video Gen Agent\n(Animated Explainers)"]
+        Verify["8. Verification Agent\n(Tutor Docs Check)"]
+        Matching["10. Matching Agent\n(Tutor ↔ Student)"]
+        Report["12. Report Agent\n(All Roles)"]
+    end
+
+    Pipeline -.->|"content ready"| Curriculum
 ```
 
 ---
 
-## 5. Database ER Diagram
+## 7. Database Entity Relationship (v2.0)
 
 ```mermaid
 erDiagram
-    users ||--|| students : "has"
-    users ||--o{ parent_reports : "receives (as parent)"
-    users ||--o{ refresh_tokens : "has"
+    users ||--o| students : "has (student)"
+    users ||--o| tutors : "has (tutor)"
+    users ||--o| principals : "has (principal)"
+    users ||--o{ notifications : "receives"
+
+    tutors ||--o{ tutor_documents : "submits"
+    tutors ||--o{ content_reviews : "performs"
+    tutors ||--o{ assessments : "reviews (as tutor)"
+
+    principals ||--o{ approval_workflows : "manages"
+
     students ||--o{ sessions : "participates"
-    students ||--o{ student_topic_progress : "tracks"
-    students ||--o{ practice_sets : "completes"
-    students ||--o{ student_achievements : "earns"
-    students ||--o{ assessments : "evaluated"
-    sessions ||--o{ messages : "contains"
-    messages ||--|| assessments : "evaluated by"
-    topics ||--o{ topic_prerequisites : "requires"
-    topics ||--o{ student_topic_progress : "tracked in"
-    topics ||--o{ assessments : "categorized by"
-    topics ||--o{ knowledge_documents : "covered by"
-    practice_sets ||--o{ practice_questions : "contains"
-    practice_questions }o--|| topics : "belongs to"
+    students ||--o{ assessments : "takes"
+    students }o--|| tutors : "matched to"
+
+    curriculum_nodes ||--o{ curriculum_nodes : "parent of"
+    curriculum_nodes ||--o{ content_lessons : "organizes"
+
+    source_documents ||--o{ content_lessons : "generates"
+    content_lessons ||--o{ content_reviews : "reviewed in"
+
+    approval_workflows }o--|| tutors : "for"
+    approval_workflows }o--|| content_lessons : "for"
 
     users {
         uuid id PK
-        string email UK
+        string email
         string password_hash
         string full_name
         string role
-        string google_id
-        boolean is_active
+        string phone
+        string country
+        string state
         timestamp created_at
     }
 
     students {
         uuid id PK
         uuid user_id FK
+        string gender
+        string school
+        string learning_style
+        jsonb interests
+        uuid matched_tutor_id FK
+    }
+
+    tutors {
+        uuid id PK
+        uuid user_id FK
+        jsonb subjects
+        int experience_yrs
+        string verification_status
+        float rating
+    }
+
+    tutor_documents {
+        uuid id PK
+        uuid tutor_id FK
+        string doc_type
+        string file_url
+        boolean ai_verified
+        float ai_confidence
+    }
+
+    principals {
+        uuid id PK
+        uuid user_id FK
+        string institution
+        jsonb jurisdiction
+    }
+
+    curriculum_nodes {
+        uuid id PK
         uuid parent_id FK
-        int age
-        string grade
-        string preferred_language
-        float learning_speed
-        float confidence_score
-        int total_questions
-        float accuracy_rate
-        int current_streak
-        int total_points
+        string node_type
+        string name_en
+        string name_hi
+        string grade_start
     }
 
-    sessions {
+    content_lessons {
         uuid id PK
-        uuid student_id FK
-        string session_type
+        uuid curriculum_node_id FK
+        string title
+        text content_text
         string language
-        int questions_asked
+        string region
+        string video_url
         string status
-        timestamp started_at
     }
 
-    messages {
+    content_reviews {
         uuid id PK
-        uuid session_id FK
-        string role
-        text content
-        string content_type
-        int hint_level
-        boolean is_correct
+        uuid lesson_id FK
+        uuid tutor_id FK
+        string action
+        text feedback
+        float accuracy_score
+    }
+
+    approval_workflows {
+        uuid id PK
+        string workflow_type
+        uuid target_id
+        string current_step
+        string status
+        jsonb steps_history
+    }
+
+    source_documents {
+        uuid id PK
+        string title
+        string file_url
+        uuid uploaded_by FK
+        string extraction_status
+    }
+
+    notifications {
+        uuid id PK
+        uuid user_id FK
+        string type
+        string title
+        text message
+        boolean is_read
     }
 
     assessments {
         uuid id PK
-        uuid message_id FK
         uuid student_id FK
-        uuid topic_id FK
-        boolean is_correct
-        string error_type
-        text misconception
-        boolean sympy_verified
-    }
-
-    topics {
-        uuid id PK
-        uuid parent_id FK
-        string name_en
-        string name_hi
-        string name_bn
-        string grade_start
-        string category
-    }
-
-    student_topic_progress {
-        uuid id PK
-        uuid student_id FK
-        uuid topic_id FK
-        float mastery_score
-        boolean is_weak
-        int questions_attempted
-    }
-
-    practice_sets {
-        uuid id PK
-        uuid student_id FK
-        uuid topic_id FK
-        string difficulty
-        int question_count
-        string status
-    }
-
-    practice_questions {
-        uuid id PK
-        uuid practice_set_id FK
-        int question_number
-        text question_text
-        text correct_answer
-        jsonb hints
-    }
-
-    parent_reports {
-        uuid id PK
-        uuid student_id FK
-        uuid parent_id FK
-        string report_type
-        date period_start
-        date period_end
-        jsonb report_data
-    }
-
-    topic_prerequisites {
-        uuid id PK
-        uuid topic_id FK
-        uuid prerequisite_id FK
-        string importance
-    }
-
-    knowledge_documents {
-        uuid id PK
-        string title
-        uuid topic_id FK
-        string grade
-        string language
-        string qdrant_collection
+        string assessment_type
+        string image_url
+        text ocr_text
+        text tutor_feedback
+        text ai_feedback
     }
 ```
 
 ---
 
-## 6. Deployment Architecture
+## 8. Deployment Architecture
 
 ```mermaid
 graph TB
     subgraph Docker["DOCKER HOST"]
-        subgraph Frontend["Frontend Container"]
+        subgraph Frontend["Frontend"]
             Next["Next.js :3000"]
         end
-
-        subgraph Backend["Backend Container"]
+        subgraph Backend["Backend"]
             FastAPI1["FastAPI Worker 1"]
             FastAPI2["FastAPI Worker 2"]
             FastAPI3["FastAPI Worker 3"]
             FastAPI4["FastAPI Worker 4"]
         end
-
-        subgraph Proxy["Reverse Proxy"]
+        subgraph Proxy["Proxy"]
             NginxD["Nginx :80/:443"]
         end
-
         subgraph DataS["Data Services"]
             PGD["PostgreSQL :5432"]
             RedisD["Redis :6379"]
             QdrantD["Qdrant :6333"]
+            MinioD["MinIO :9000"]
         end
-
+        subgraph Queue["Async Tasks"]
+            Rabbit["RabbitMQ :5672"]
+            Worker["Celery Worker"]
+        end
         subgraph Monitor["Monitoring"]
             LangfuseD["Langfuse :3000"]
             PromD["Prometheus :9090"]
@@ -407,23 +386,23 @@ graph TB
     Internet["Internet"] --> NginxD
     NginxD --> Next
     NginxD --> FastAPI1 & FastAPI2 & FastAPI3 & FastAPI4
-    FastAPI1 & FastAPI2 & FastAPI3 & FastAPI4 --> PGD
-    FastAPI1 & FastAPI2 & FastAPI3 & FastAPI4 --> RedisD
-    FastAPI1 & FastAPI2 & FastAPI3 & FastAPI4 --> QdrantD
-    FastAPI1 & FastAPI2 & FastAPI3 & FastAPI4 --> LangfuseD
-    PromD --> FastAPI1 & FastAPI2 & FastAPI3 & FastAPI4
+    FastAPI1 & FastAPI2 & FastAPI3 & FastAPI4 --> PGD & RedisD & QdrantD & MinioD
+    FastAPI1 --> Rabbit
+    Rabbit --> Worker
+    Worker --> PGD & MinioD
+    PromD --> FastAPI1
     GrafanaD --> PromD
 ```
 
 ---
 
-## 7. Hint → Guide → Solve Flow
+## 9. Hint → Guide → Solve Flow (Student Interaction)
 
 ```mermaid
 stateDiagram-v2
     [*] --> QuestionReceived: Student asks question
 
-    QuestionReceived --> Hint1: Teacher gives Hint 1\n(Conceptual nudge)
+    QuestionReceived --> Hint1: AI Teacher gives Hint 1\n(Conceptual nudge)
     Hint1 --> StudentAttempt1: Student tries
     StudentAttempt1 --> Correct1: Answer correct ✅
     StudentAttempt1 --> Hint2: Answer wrong ❌
@@ -434,15 +413,15 @@ stateDiagram-v2
 
     Hint3 --> StudentAttempt3: Student tries again
     StudentAttempt3 --> Correct3: Answer correct ✅
-    StudentAttempt3 --> Solution: Student gives up/asks
+    StudentAttempt3 --> Solution: Student gives up / asks
 
-    Solution --> StepByStep: Show step-by-step\nsolution
-    StepByStep --> FinalAnswer: Show final answer
+    Solution --> StepByStep: Show step-by-step solution\n+ Explain why answer was wrong
+    StepByStep --> FinalAnswer: Show correct answer
 
-    Correct1 --> Celebrate: Motivation + points
-    Correct2 --> Celebrate: Motivation + points
-    Correct3 --> Celebrate: Motivation + points
-    FinalAnswer --> UpdateTwin: Save to student profile
+    Correct1 --> Celebrate: 🎉 Celebration + points
+    Correct2 --> Celebrate: 🎉 Celebration + points
+    Correct3 --> Celebrate: 🎉 Celebration + points
+    FinalAnswer --> UpdateTwin: Save to Digital Twin
 
     Celebrate --> UpdateTwin
     UpdateTwin --> [*]: Session continues
@@ -450,4 +429,4 @@ stateDiagram-v2
 
 ---
 
-*These diagrams are rendered natively by GitHub when viewing the markdown files.*
+*Diagrams render natively on GitHub when viewing the markdown file.*
