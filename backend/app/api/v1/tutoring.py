@@ -377,3 +377,123 @@ def _looks_like_answer(content: str) -> bool:
 
 # Import at module level
 from app.models.session import Session
+"""Tutoring Chat API — single-shot chat endpoint for frontend"""
+
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
+from uuid import UUID
+
+from app.core.database import get_db
+from app.core.security import get_current_student
+from app.models.student import Student
+from app.services.tutoring import TutoringService
+from app.services.student import StudentService
+
+# router already defined above
+
+
+class ChatRequest(BaseModel):
+    session_id: str | None = None
+    message: str
+    language: str = "en"
+    action: str = "hint"    # "hint" | "evaluate" | "greeting" | "solution"
+    hint_level: int = 1
+
+
+@router.post("/chat")
+async def chat_endpoint(
+    body: ChatRequest,
+    student: Student = Depends(get_current_student),
+    db: AsyncSession = Depends(get_db),
+):
+    """Handle a chat message from the student — returns AI response."""
+    tutoring = TutoringService(db)
+
+    # Auto-create session if none provided
+    session_id = None
+    if body.session_id:
+        try:
+            session_id = UUID(body.session_id)
+        except ValueError:
+            pass
+
+    if not session_id:
+        session = await tutoring.start_session(
+            student_id=student.id,
+            session_type="tutoring",
+            language=body.language,
+        )
+        await db.commit()
+        session_id = session.id
+    else:
+        session_id = UUID(body.session_id)
+
+    # Save student message
+    await tutoring.save_message(
+        session_id=session_id,
+        role="student",
+        content=body.message,
+        content_type="text",
+    )
+
+    try:
+        if body.action == "greeting":
+            response_data = await tutoring._handle_greeting(student, body.language)
+        elif body.action == "hint":
+            response_data = await tutoring.generate_hint(
+                session_id=session_id,
+                hint_level=body.hint_level,
+                student=student,
+                language=body.language,
+            )
+            await tutoring.save_message(
+                session_id=session_id,
+                role="teacher",
+                content=response_data["content"],
+                content_type="hint",
+                hint_level=body.hint_level,
+            )
+        elif body.action == "evaluate":
+            response_data = await tutoring.process_student_answer(
+                session_id=session_id,
+                student_answer=body.message,
+                student=student,
+                language=body.language,
+            )
+        elif body.action == "solution":
+            response_data = await tutoring.generate_solution(
+                session_id=session_id,
+                student=student,
+                language=body.language,
+            )
+            steps_text = "\n\n".join(
+                f"**Step {s['step']}:** {s['text']}"
+                for s in response_data.get("steps", [])
+            )
+            await tutoring.save_message(
+                session_id=session_id,
+                role="teacher",
+                content=steps_text,
+                content_type="solution",
+            )
+            response_data["content"] = steps_text
+        else:
+            response_data = await tutoring.process_student_message(
+                session_id=session_id,
+                student_message=body.message,
+                student=student,
+                language=body.language,
+            )
+
+        await db.commit()
+        return {
+            "content": response_data.get("content", ""),
+            "type": response_data.get("type", "text"),
+            "hint_level": response_data.get("hint_level"),
+            "session_id": str(session_id),
+        }
+
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
