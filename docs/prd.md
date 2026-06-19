@@ -1,316 +1,220 @@
-# Product Requirements Document (PRD) — Math Tutor AI Agent
+# Product Requirements Document (PRD) — AI Student Tutor Platform
 
-> **Date:** 2026-06-19
-> **Version:** 1.0
-> **Status:** Draft
+> **Date:** 2026-06-19 | **Version:** 2.0 | **Status:** Updated
 > **Author:** WorkCore (RCore)
 
 ---
 
 ## 1. Product Vision
 
-**An adaptive AI math teacher that speaks every Indian student's language, understands their unique learning journey, and grows with them from Nursery to Class 10.**
+**An AI-powered personalized learning platform that transforms educational content into interactive, voice-enabled, adaptive learning experiences — with human oversight at every stage.**
 
-We are not building a chatbot. We are building a personal math tutor that:
-- Remembers every student by name
-- Knows their strengths and weaknesses
-- Adapts teaching style to age and language
-- Never gives up on a concept
-- Keeps parents informed and reassured
+The platform serves Students, Tutors, Principals, and Super Admins in a complete educational ecosystem where AI generates and personalizes content, and human experts validate quality.
 
 ---
 
 ## 2. Product Name
 
-**GanitMitra** (गणित मित्र / গণিত মিত্র)
-— "Math Friend" in Hindi and Bengali
+**GanitMitra → VidyaMitra**
+(विद्या मित्र / বিদ্যা মিত্র — "Knowledge Friend")
 
 ---
 
 ## 3. Target Users
 
-### Primary Users
-- **Students:** Age 3-16, Nursery to Class 10
-- **Languages:** English, Hindi, Bengali
-- **Geography:** India (primary), global Indian diaspora (secondary)
-
-### Secondary Users
-- **Parents:** Monitor progress, receive reports, set goals
-- **Teachers/Tutors:** Manage multiple students, assign practice
+| Role | Description | Count |
+|------|-------------|-------|
+| **Student** | Learner consuming personalized content | Primary (unlimited) |
+| **Tutor** | Subject expert validating AI content | Medium (per subject) |
+| **Principal** | Academic supervisor, quality assurance | Few (per institution) |
+| **Super Admin** | Platform governance, compliance | 1-2 per org |
 
 ---
 
 ## 4. Core Features (MoSCoW)
 
-### 🔴 Must Have (MVP)
+### 🔴 Must Have (MVP v2.0)
 
-| ID | Feature | Description |
-|----|---------|-------------|
-| F1 | **Multilingual Chat Tutoring** | Text-based math tutoring in EN/HI/BN with age-appropriate responses |
-| F2 | **Grade Selection** | Student selects or is placed in appropriate grade (N-10) |
-| F3 | **Teacher Agent** | AI that teaches using Hint → Guide → Solve methodology |
-| F4 | **Assessment Agent** | Evaluates student answers, identifies misconceptions |
-| F5 | **Student Digital Twin** | Persistent profile: age, grade, strengths, weaknesses, progress |
-| F6 | **Hint → Guide → Solve** | Never gives direct answers; progressive scaffolding |
-| F7 | **SymPy Verification** | All math answers verified computationally |
-| F8 | **Progress Dashboard** | Student view of topics mastered, in-progress, not started |
-| F9 | **Authentication** | Secure login (email/password + Google OAuth) |
-| F10 | **Session Persistence** | All sessions saved, resumable |
+| ID | Feature | Role |
+|----|---------|------|
+| F1 | Multi-role auth (Student/Tutor/Principal/Admin) | All |
+| F2 | Student registration with learning preferences | Student |
+| F3 | AI Student Profile (Digital Twin v2) | Student |
+| F4 | Subject → Chapter → Topic navigation | Student |
+| F5 | Personalized content delivery (text + audio + video) | Student |
+| F6 | Voice-based conversational learning | Student |
+| F7 | AI Tutor with Hint→Guide→Solve methodology | Student |
+| F8 | Assessment Engine (MCQ + Short Answer + Subjective) | Student |
+| F9 | AI answer evaluation with SymPy + handwriting OCR | Student |
+| F10 | Progress tracking dashboard with gamification | Student |
+| F11 | Tutor registration + document verification workflow | Tutor |
+| F12 | AI content generation (PDF → Lessons → Video) | Tutor/Admin |
+| F13 | Content validation pipeline (Tutor review → Publish) | Tutor |
+| F14 | Tutor dashboard (student performance, analytics) | Tutor |
+| F15 | Principal dashboard (monitor tutors, quality) | Principal |
+| F16 | Super Admin dashboard (org-wide analytics) | Admin |
+| F17 | AI Analytics Engine (learning patterns, trends) | All |
 
-### 🟡 Should Have (V1.1)
+### 🟡 Should Have (V2.1)
 
-| ID | Feature | Description |
-|----|---------|-------------|
-| F11 | **Voice Input (STT)** | Speech-to-text for questions in all 3 languages |
-| F12 | **Voice Output (TTS)** | Text-to-speech for responses in all 3 languages |
-| F13 | **Practice Quiz Generator** | Auto-generates topic-specific practice sets |
-| F14 | **Parent Report Agent** | Weekly progress reports, weak area alerts |
-| F15 | **Curriculum RAG** | NCERT/CBSE/State board curriculum knowledge base |
-| F16 | **Multi-Model Routing** | Fast model for chat, reasoning model for math, translation model |
-| F17 | **Gamification Basics** | Points, badges, streaks |
+| ID | Feature |
+|----|---------|
+| F18 | AI Video Generation (animated concept explanations) |
+| F19 | Intelligent Tutor Matching (subject + language + region) |
+| F20 | Tutor reassignment workflow |
+| F21 | Parent dashboard |
+| F22 | Multi-language content personalization |
+| F23 | Regional/cultural content adaptation |
+| F24 | Learning marketplace |
 
-### 🟢 Could Have (V1.2)
+### 🟢 Could Have (V2.2)
 
-| ID | Feature | Description |
-|----|---------|-------------|
-| F18 | **Nursery-KG Mode** | Visual stories, shapes, counting with animations |
-| F19 | **Exam Prep Mode** | Board exam paper practice, mock tests |
-| F20 | **Offline PWA** | Progressive web app with offline capability |
-| F21 | **Teacher Dashboard** | Classroom management for tutors/teachers |
-| F22 | **Advanced Analytics** | Learning velocity, confidence trends, prediction |
-
-### 🔵 Won't Have (V1)
-
-| ID | Feature | Reason |
-|----|---------|--------|
-| W1 | Video-based tutoring | Scope — text+voice sufficient for MVP |
-| W2 | Live human tutor connection | Different product category |
-| W3 | Subjects beyond Math | Stay focused on math specialization |
-| W4 | Mobile native apps | PWA approach preferred |
+| ID | Feature |
+|----|---------|
+| F25 | Live AI Avatar Tutor |
+| F26 | Real-time classroom |
+| F27 | Multi-school support |
+| F28 | Career guidance AI |
+| F29 | Emotional learning analytics |
+| F30 | Offline mobile learning (PWA) |
 
 ---
 
 ## 5. User Journeys
 
-### 5.1 New Student Onboarding
+### 5.1 Student Learning Journey
 
 ```
-1. Student visits GanitMitra
-2. Clicks "Start Learning" → Sign Up / Login
-3. Enters: Name, Age, Grade, Preferred Language
-4. Takes quick placement assessment (5 questions)
-5. System creates Digital Twin profile
-6. Lands on personalized dashboard
-7. First tutoring session begins
+1. Register → Profile (age, grade, language, interests)
+2. AI creates learning profile (Digital Twin v2)
+3. Select Subject → Chapter → Topic
+4. AI delivers personalized content (text/audio/video)
+5. Voice-based Q&A with AI Tutor
+6. Complete exercises + practice
+7. Take Mock Test (MCQ + Short Answer + Subjective)
+8. AI identifies weak areas → personalized revision
+9. Take Final Assessment
+10. View progress dashboard (scores, badges, streaks)
 ```
 
-### 5.2 Daily Learning Session
+### 5.2 Tutor Workflow
 
 ```
-1. Student logs in → sees dashboard
-2. System suggests "Today's Topic" based on curriculum + weak areas
-3. Student asks question or accepts suggestion
-4. Teacher Agent provides hint
-5. Student attempts answer
-6. Assessment Agent evaluates → Right? Move on | Wrong? Scaffold
-7. Session saved to digital twin
-8. Streak updated, points earned
-9. Student sees session summary
+1. Register → Upload qualifications
+2. AI Verification Agent checks documents
+3. Principal reviews → Super Admin approves
+4. Access Tutor Dashboard
+5. Review AI-generated content → Approve/Modify/Reject
+6. Monitor student progress
+7. Provide personalized feedback
 ```
 
-### 5.3 Parent Check-In
+### 5.3 Content Creation Pipeline
 
 ```
-1. Parent logs in → sees child's dashboard
-2. Views: Topics mastered, current focus, weak areas
-3. Reads: Weekly progress summary
-4. Sees: Time spent, questions attempted, accuracy
-5. Receives: Recommendation for support at home
-6. Optional: Sets daily practice goal
-```
-
-### 5.4 Practice Mode
-
-```
-1. Student selects "Practice" from dashboard
-2. Chooses: Topic, difficulty, question count
-3. Practice Agent generates problems
-4. Student solves one at a time
-5. Immediate feedback after each
-6. End-of-practice score + detailed breakdown
-7. Weak areas flagged for future tutoring
+Admin uploads PDF/notes
+  → AI extracts content + creates embeddings
+  → AI generates: lesson plans, summaries, explanations
+  → AI generates: videos, voice narration, examples
+  → Tutor validates (accuracy, completeness, alignment)
+  → Content published to knowledge base
+  → Students access personalized versions
 ```
 
 ---
 
 ## 6. Functional Requirements
 
-### 6.1 Tutoring Engine
+### 6.1 Student Module
 
 | Requirement | Detail |
 |-------------|--------|
-| Hint generation | Progressive hints (3 levels before solution) |
-| Solution steps | Break every problem into logical steps |
-| Answer evaluation | Compare to SymPy-verified answer, not just LLM output |
-| Misconception detection | Pattern-matching common errors (e.g., order of operations) |
-| Re-teaching | If wrong, teach prerequisite concept before retry |
-| Difficulty adjustment | Auto-scale based on success rate (80% target) |
-| Language switching | Mid-session language change support |
+| Registration | Name, age, gender, class, school, location, language preference |
+| AI Profile | Dynamic profile: learning speed, strengths, weaknesses, interests |
+| Subject nav | Browse subjects → chapters → topics |
+| Content types | Text lessons, audio, video, interactive exercises |
+| Voice learning | Ask questions verbally, receive spoken responses |
+| Assessments | MCQ, fill-in-blanks, match, short answer, subjective (image upload) |
+| Progress | Dashboard with scores, streaks, badges, recommendations |
 
-### 6.2 Student Digital Twin
+### 6.2 Tutor Module
 
-| Field | Type | Update Trigger |
-|-------|------|----------------|
-| Age | Integer | Profile / birthday |
-| Grade | Enum(N-10) | Profile / auto-promotion |
-| Preferred Language | Enum(EN/HI/BN) | Profile |
-| Learning Speed | Float (1-10) | Per session |
-| Topic Strengths | JSON {topic: score} | Per question |
-| Topic Weaknesses | JSON {topic: score} | Per question |
-| Mistake Patterns | JSON [{pattern, count}] | Per error |
-| Confidence Score | Float (0-1) | Per session |
-| Session History | Relation | Per session |
-| Questions Attempted | Integer (cumulative) | Per question |
-| Accuracy Rate | Float (%) | Per question |
+| Requirement | Detail |
+|-------------|--------|
+| Registration | Personal + professional details, qualification documents |
+| AI Verification | Auto-verify degrees, certificates, consistency |
+| Approval | Principal review → Super Admin approval workflow |
+| Content validation | Review AI-generated content, approve/modify/reject |
+| Student monitoring | View progress, scores, weak areas per student |
+| Feedback | Personalized feedback, study plans, recommendations |
 
-### 6.3 Multi-Agent System
+### 6.3 Principal Module
 
-See [Agent Design Document](./agent-design.md) for full detail.
+| Requirement | Detail |
+|-------------|--------|
+| Dashboard | Student + tutor data, platform analytics |
+| Tutor monitoring | Performance, activity, content reviews |
+| Quality assurance | Approve escalations, ensure standards |
+| Content governance | Review published content quality |
 
-| Agent | Responsibility |
-|-------|---------------|
-| Teacher Agent | Primary interaction, hint-based tutoring |
-| Assessment Agent | Answer evaluation, misconception detection |
-| Curriculum Agent | Topic sequencing, curriculum alignment |
-| Practice Agent | Quiz/practice set generation |
-| Motivation Agent | Encouragement, streaks, gamification |
-| Analytics Agent | Progress computation, trend analysis |
-| Parent Report Agent | Weekly digest generation |
-| Voice Agent | STT/TTS orchestration |
+### 6.4 Super Admin Module
 
-### 6.4 Multi-Model Strategy
-
-| Task | Model | Reason |
-|------|-------|--------|
-| Chat/Interaction | GPT-4o-mini / Claude Haiku | Fast, cost-effective |
-| Math Reasoning | GPT-4o / Claude Sonnet / DeepSeek V4 | Strong reasoning needed |
-| Translation | GPT-4o / Claude (native multilingual) | Built-in capability |
-| Voice STT | Whisper (OpenAI) | Best accuracy for Indian languages |
-| Voice TTS | ElevenLabs / Azure TTS | Natural voice output |
-| Math Verification | SymPy (local) | Deterministic, zero hallucination |
-
-### 6.5 Content & Curriculum
-
-| Board | Coverage |
-|-------|----------|
-| NCERT/CBSE | Full K-10 mathematics |
-| ICSE | K-10 mathematics |
-| West Bengal Board | Bengali-medium mathematics |
-| State Boards | Common core topics |
-
-Topics organized by grade with prerequisite mappings in the RAG knowledge base.
+| Requirement | Detail |
+|-------------|--------|
+| Organization dashboard | Platform-wide visibility |
+| User management | Manage principals, tutors, students |
+| Approval workflows | Final approval for tutors, content |
+| Analytics | Total users, engagement, outcomes |
+| Notifications | New tutor requests, content alerts, escalations |
 
 ---
 
-## 7. Non-Functional Requirements
+## 7. AI Agent Architecture (v2.0 — Expanded)
 
-### 7.1 Performance
+| # | Agent | Role |
+|---|-------|------|
+| 1 | **Teacher Agent** | Conversational voice tutoring, personalized explanations |
+| 2 | **Assessment Agent** | Evaluate answers (MCQ + text + image), scoring |
+| 3 | **Curriculum Agent** | Subject → Chapter → Topic sequencing, knowledge graph |
+| 4 | **Content Generation Agent** | PDF → lessons, summaries, videos |
+| 5 | **Content Personalization Agent** | Adapt by language, region, culture, grade |
+| 6 | **Video Generation Agent** | Auto-create animated concept explanations |
+| 7 | **Verification Agent** | Verify tutor qualifications, documents |
+| 8 | **Matching Agent** | Intelligent tutor-student matching |
+| 9 | **Analytics Agent** | Learning patterns, trends, predictions |
+| 10 | **Motivation Agent** | Encouragement, streaks, gamification |
+| 11 | **Voice Agent** | STT/TTS for all supported languages |
+| 12 | **Report Agent** | Student, tutor, principal, admin reports |
 
-| Metric | Target |
-|--------|--------|
-| First response (chat) | < 2 seconds |
-| Math reasoning response | < 5 seconds |
-| Voice STT processing | < 3 seconds |
-| Page load (LCP) | < 2.5 seconds |
-| Concurrent users | 1,000 (MVP), 10,000 (scale) |
-| API p95 latency | < 500ms |
+### Multi-Model AI Strategy
 
-### 7.2 Security
-
-| Requirement | Detail |
-|-------------|--------|
-| Authentication | JWT + refresh tokens |
-| Authorization | Role-based (student, parent, admin) |
-| Data encryption | At rest (AES-256) + in transit (TLS 1.3) |
-| Input sanitization | All user inputs sanitized |
-| Rate limiting | Per-user, per-IP |
-| Content filtering | No inappropriate content generation |
-| Data privacy | COPPA-compliant for under-13 users |
-| GDPR basics | Data export, account deletion |
-| LLM prompt injection | Guardrails against jailbreak attempts |
-
-### 7.3 Reliability
-
-| Metric | Target |
-|--------|--------|
-| Uptime | 99.5% |
-| Data backup | Daily, 30-day retention |
-| Disaster recovery | < 4 hour RTO |
-| Session persistence | Auto-save every interaction |
-
-### 7.4 Accessibility
-
-| Standard | Level |
-|----------|-------|
-| WCAG 2.1 | AA |
-| Screen reader | Compatible |
-| Keyboard navigation | Full |
-| Color contrast | 4.5:1 minimum |
-| Font scaling | Up to 200% |
+| Task | Model | Provider |
+|------|-------|----------|
+| Conversational teaching | GPT-4o / DeepSeek V4 | OpenAI / DeepSeek |
+| Content generation | GPT-4o | OpenAI |
+| Video generation | Sora / RunwayML | OpenAI / Third-party |
+| Translation & localization | GPT-4o (multilingual) | OpenAI |
+| Voice STT | Whisper | OpenAI |
+| Voice TTS | ElevenLabs / Azure / OpenAI | Multi-provider |
+| Math verification | SymPy | Local |
+| Document OCR | Tesseract / Azure Vision | Local / Azure |
+| Embeddings | text-embedding-3-small | OpenAI |
 
 ---
 
 ## 8. Success Metrics
 
-### 8.1 Product KPIs
-
-| Metric | Target (3 months) | Target (12 months) |
-|--------|-------------------|---------------------|
-| Registered students | 5,000 | 50,000 |
-| DAU (Daily Active Users) | 500 | 5,000 |
-| Avg. session duration | 15 min | 20 min |
-| Sessions per week per user | 3 | 5 |
-| Topic mastery rate | 70% | 85% |
-| Parent report opens | 60% | 80% |
-| Free → Paid conversion | 5% | 8% |
-| Churn rate | < 10%/month | < 5%/month |
-
-### 8.2 Learning Outcomes
-
-| Metric | Target |
-|--------|--------|
-| Accuracy improvement (30 days) | +15% |
-| Weak area resolution (2 weeks) | 60% of flagged topics |
-| Grade-level readiness | 80% of students at/above grade level |
-| Student confidence score increase | +0.2 (on 0-1 scale) |
+| Metric | Target (6 months) |
+|--------|-------------------|
+| Registered students | 10,000 |
+| Active tutors | 200 |
+| Content lessons published | 5,000 |
+| Student engagement (DAU) | 2,000 |
+| Tutor content approval rate | >85% |
+| Student learning velocity | +20% |
+| NPS (Student) | >50 |
+| NPS (Tutor) | >40 |
 
 ---
 
-## 9. Constraints & Assumptions
-
-### Constraints
-- Must work on low-end smartphones (2GB RAM)
-- Must handle intermittent connectivity
-- Hindi/Bengali TTS quality limited by available models
-- Indian K-10 curriculum varies by state/board
-
-### Assumptions
-- Students have basic digital literacy or parental assistance
-- Internet connectivity available (not offline-first for MVP)
-- Parents willing to pay for quality math tutoring
-- LLM APIs remain accessible and affordable
-
----
-
-## 10. Out of Scope (V1)
-
-- Non-math subjects
-- Live video tutoring
-- School ERP integration
-- Government scheme integration
-- Physical workbook generation
-- AR/VR experiences
-
----
-
-## Next: System Architecture → [architecture.md](./architecture.md)
+## Next: Architecture → [architecture.md](./architecture.md)
