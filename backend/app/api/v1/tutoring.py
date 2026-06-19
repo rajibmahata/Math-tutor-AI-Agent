@@ -461,7 +461,8 @@ async def chat_endpoint(
     try:
         if body.action == "greeting":
             from app.agents.orchestrator import orchestrator, AgentContext
-            student_name = (await _get_student_name(student, db)) or ""
+            full_name = (await _get_student_name(student, db)) or ""
+            student_name = full_name.split()[0] if full_name else ""  # First name only
             ctx = AgentContext(
                 student_id=str(student.id),
                 student_name=student_name,

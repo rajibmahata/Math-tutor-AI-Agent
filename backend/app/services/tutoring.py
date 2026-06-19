@@ -386,7 +386,7 @@ Respond with exactly ONE word: greeting, learn, or progress.""" },
         result = await self.db.execute(select(User).where(User.id == student.user_id))
         user = result.scalar_one_or_none()
         if user:
-            student_name = user.full_name
+            student_name = user.full_name.split()[0]  # First name only
 
         greetings = {
             "en": f"Hi {student_name}! Ready to learn some math today? What would you like to practice? 😊",
