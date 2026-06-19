@@ -54,22 +54,6 @@ async def register_tutor(
     }
 
 
-@router.get("/{tutor_id}")
-async def get_tutor(tutor_id: str, db: AsyncSession = Depends(get_db)):
-    tid = uuid.UUID(tutor_id)
-    r = await db.execute(select(Tutor).where(Tutor.id == tid))
-    tutor = r.scalar_one_or_none()
-    if not tutor:
-        raise HTTPException(status_code=404, detail="Tutor not found")
-    return {
-        "id": str(tutor.id), "user_id": str(tutor.user_id),
-        "subjects": tutor.subjects, "experience_yrs": tutor.experience_yrs,
-        "bio": tutor.bio, "verification_status": tutor.verification_status,
-        "rating": tutor.rating, "total_students": tutor.total_students,
-        "is_active": tutor.is_active,
-    }
-
-
 @router.get("/dashboard")
 async def my_tutor_dashboard(
     current_user: User = Depends(get_current_user),
@@ -87,8 +71,24 @@ async def my_tutor_dashboard(
     }
 
 
+@router.get("/{tutor_id}")
+async def get_tutor(tutor_id: str, db: AsyncSession = Depends(get_db)):
+    tid = uuid.UUID(tutor_id)
+    r = await db.execute(select(Tutor).where(Tutor.id == tid))
+    tutor = r.scalar_one_or_none()
+    if not tutor:
+        raise HTTPException(status_code=404, detail="Tutor not found")
+    return {
+        "id": str(tutor.id), "user_id": str(tutor.user_id),
+        "subjects": tutor.subjects, "experience_yrs": tutor.experience_yrs,
+        "bio": tutor.bio, "verification_status": tutor.verification_status,
+        "rating": tutor.rating, "total_students": tutor.total_students,
+        "is_active": tutor.is_active,
+    }
+
+
 @router.get("/{tutor_id}/dashboard")
-async def tutor_dashboard(tutor_id: str, db: AsyncSession = Depends(get_db)):
+async def tutor_dashboard_by_id(tutor_id: str, db: AsyncSession = Depends(get_db)):
     tid = uuid.UUID(tutor_id)
     r = await db.execute(select(Tutor).where(Tutor.id == tid))
     tutor = r.scalar_one_or_none()
