@@ -130,15 +130,18 @@ class AgentOrchestrator:
         return ctx
 
     async def _run_assessment_flow(self, ctx: AgentContext) -> AgentContext:
-        """Assessment Agent → Motivation Agent → response."""
+        """Assessment Agent → Solution if wrong."""
         ctx.student_answer = ctx.message
-        
-        # Assessment Agent: evaluate
         assessment = await self._assessment_agent(ctx)
         ctx.is_correct = assessment["is_correct"]
         
-        # Motivation Agent: encourage
-        motivation = await self._motivation_agent(ctx)
+        if ctx.is_correct:
+            # Correct: celebrate + brief motivation
+            ctx.response = assessment.get("feedback", "⭐ Correct! 🎉")
+        else:
+            # Wrong: explain why + show step-by-step solution
+            solution = await self.generate_solution(ctx)
+            ctx.response = assessment.get("feedback", "Let me explain.") + "\n\n" + solution
         
         ctx.response = assessment.get("feedback", motivation)
         return ctx
