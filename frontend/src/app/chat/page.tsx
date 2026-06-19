@@ -103,9 +103,10 @@ export default function ChatPage() {
   // Init
   useEffect(() => {
     const tkn = localStorage.getItem("access_token");
-    const name = localStorage.getItem("student_name") || "";
+    const fullName = localStorage.getItem("student_name") || "";
+    const firstName = fullName.split(" ")[0];
     setToken(tkn);
-    setStudentName(name);
+    setStudentName(firstName);
     addMessage("teacher", t.welcome.replace("{name}", name || ""), "greeting");
     if (tkn) initSession(tkn);
     
