@@ -277,7 +277,7 @@ export default function ChatPage() {
   const handleAnswer = async (content: string) => {
     if (sessionId && token) {
       try {
-        const data = await apiCall("/tutoring/chat", { session_id: sessionId, message: content, language, action: "evaluate" });
+        const data = await apiCall("/tutoring/chat", { session_id: sessionId, message: content, language, action: "evaluate", question: lastQuestion });
         addMessage("teacher", data.content, "feedback");
         setHintLevel(0);
         return;

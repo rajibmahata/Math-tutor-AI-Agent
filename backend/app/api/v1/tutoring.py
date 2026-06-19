@@ -387,7 +387,6 @@ from uuid import UUID
 from app.core.database import get_db
 from app.core.security import get_current_student
 from app.models.student import Student
-from app.services.tutoring import TutoringService
 from app.services.student import StudentService
 
 # router already defined above
@@ -399,6 +398,28 @@ class ChatRequest(BaseModel):
     language: str = "en"
     action: str = "hint"    # "hint" | "evaluate" | "greeting" | "solution"
     hint_level: int = 1
+    question: str | None = None  # Original question context for evaluate/solution
+
+
+async def _get_student_name(student: Student, db: AsyncSession) -> str:
+    """Get student's full name from User table."""
+    from sqlalchemy import select
+    from app.models.user import User
+    result = await db.execute(select(User.full_name).where(User.id == student.user_id))
+    name = result.scalar_one_or_none()
+    return name or ""
+
+
+def student_name_from_db(student: Student, db: AsyncSession) -> str:
+    """Sync wrapper for name lookup."""
+    import asyncio
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            return ""  # Can't run sync in async context
+        return loop.run_until_complete(_get_student_name(student, db))
+    except RuntimeError:
+        return ""
 
 
 @router.post("/chat")
@@ -429,56 +450,105 @@ async def chat_endpoint(
     else:
         session_id = UUID(body.session_id)
 
-    # Save student message (except for evaluate — it saves its own)
-    if body.action != "evaluate":
-        await tutoring.save_message(
-            session_id=session_id,
-            role="student",
-            content=body.message,
-            content_type="text",
-        )
+    # Save student message (always — needed for context)
+    await tutoring.save_message(
+        session_id=session_id,
+        role="student",
+        content=body.message,
+        content_type="text",
+    )
 
     try:
         if body.action == "greeting":
-            response_data = await tutoring._handle_greeting(student, body.language)
-        elif body.action == "hint":
-            response_data = await tutoring.generate_hint(
-                session_id=session_id,
-                hint_level=body.hint_level,
-                student=student,
+            from app.agents.orchestrator import orchestrator, AgentContext
+            student_name = (await _get_student_name(student, db)) or ""
+            ctx = AgentContext(
+                student_id=str(student.id),
+                student_name=student_name,
+                grade=student.grade,
                 language=body.language,
+                session_id=str(session_id),
+                message=body.message,
+                streak=student.current_streak,
+                points=student.total_points,
+                accuracy_rate=student.accuracy_rate,
             )
+            ctx = await orchestrator.process(ctx)
+            response_data = {"content": ctx.response, "type": "greeting"}
+        elif body.action == "hint":
+            from app.agents.orchestrator import orchestrator, AgentContext
+            ctx = AgentContext(
+                student_id=str(student.id),
+                student_name=(await _get_student_name(student, db)),
+                grade=student.grade,
+                language=body.language,
+                last_question=body.message,
+                hint_level=body.hint_level,
+            )
+            hint_text = await orchestrator.generate_hint(ctx, body.hint_level)
+            response_data = {"content": hint_text, "type": "hint", "hint_level": body.hint_level}
             await tutoring.save_message(
                 session_id=session_id,
                 role="teacher",
-                content=response_data["content"],
+                content=hint_text,
                 content_type="hint",
                 hint_level=body.hint_level,
             )
         elif body.action == "evaluate":
-            response_data = await tutoring.process_student_answer(
-                session_id=session_id,
+            from app.agents.orchestrator import orchestrator, AgentContext
+            # Use provided question, or find from session messages
+            last_question = body.question or body.message
+            if not body.question:
+                recent = await tutoring.get_session_messages(session_id, limit=20)
+                passed_answer = False
+                for m in reversed(recent):
+                    if not passed_answer and m.role == "student" and m.content.strip() == body.message.strip():
+                        passed_answer = True
+                        continue
+                    if passed_answer and m.role == "student":
+                        last_question = m.content
+                        break
+            
+            student_name = (await _get_student_name(student, db)) or ""
+            ctx = AgentContext(
+                student_id=str(student.id),
+                student_name=student_name,
+                grade=student.grade,
+                language=body.language,
+                last_question=last_question,
                 student_answer=body.message,
-                student=student,
-                language=body.language,
             )
+            ctx = await orchestrator._run_assessment_flow(ctx)
+            response_data = {"content": ctx.response, "type": "feedback"}
+            
+            # Update student twin
+            await tutoring._update_student_twin(student, {"is_correct": ctx.is_correct})
         elif body.action == "solution":
-            response_data = await tutoring.generate_solution(
-                session_id=session_id,
-                student=student,
+            from app.agents.orchestrator import orchestrator, AgentContext
+            recent = await tutoring.get_session_messages(session_id, limit=15)
+            last_question = body.message
+            for m in reversed(recent):
+                if m.role == "student" and m.content.strip() != body.message.strip():
+                    if any(c.isdigit() for c in m.content):
+                        last_question = m.content
+                        break
+            
+            student_name = (await _get_student_name(student, db)) or ""
+            ctx = AgentContext(
+                student_id=str(student.id),
+                student_name=student_name,
+                grade=student.grade,
                 language=body.language,
+                last_question=last_question,
             )
-            steps_text = "\n\n".join(
-                f"**Step {s['step']}:** {s['text']}"
-                for s in response_data.get("steps", [])
-            )
+            steps_text = await orchestrator.generate_solution(ctx)
+            response_data = {"content": steps_text, "type": "solution"}
             await tutoring.save_message(
                 session_id=session_id,
                 role="teacher",
                 content=steps_text,
                 content_type="solution",
             )
-            response_data["content"] = steps_text
         else:
             response_data = await tutoring.process_student_message(
                 session_id=session_id,

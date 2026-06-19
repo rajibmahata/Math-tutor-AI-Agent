@@ -47,5 +47,12 @@ async def get_db() -> AsyncSession:
 
 async def init_db():
     """Create all tables. For dev/CI; production uses Alembic."""
+    # Force import all models so they register with Base.metadata
+    from app.models import (
+        User, RefreshToken, Student, Session, Message, Assessment,
+        Topic, TopicPrerequisite, StudentTopicProgress,
+        PracticeSet, PracticeQuestion, ParentReport,
+        StudentAchievement, KnowledgeDocument,
+    )
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
