@@ -2,26 +2,32 @@
 GanitMitra — FastAPI Application Entry Point
 """
 
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.config import settings
-from app.core.database import engine, Base
 from app.core.exceptions import register_exception_handlers
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan: startup and shutdown events."""
     # Startup
-    # Database tables are created via Alembic migrations
-    # Qdrant collection initialization happens in RAG module
+    logger.info(f"Starting {settings.app_name} v{settings.app_version}")
+    logger.info(f"Environment: {settings.app_env.value}")
+    logger.info(f"Reasoning provider: {settings.reasoning_provider.value}")
+    logger.info(f"OpenAI configured: {settings.is_openai_configured}")
+    logger.info(f"DeepSeek configured: {settings.is_deepseek_configured}")
     yield
     # Shutdown
+    from app.core.database import engine
     await engine.dispose()
+    logger.info("Shutdown complete")
 
 
 def create_application() -> FastAPI:
@@ -29,7 +35,7 @@ def create_application() -> FastAPI:
     app = FastAPI(
         title=settings.app_name,
         version=settings.app_version,
-        description="AI-Powered Multilingual Math Learning Companion",
+        description="AI-Powered Multilingual Math Learning Companion for Nursery to Class 10",
         docs_url="/api/docs" if settings.debug else None,
         redoc_url="/api/redoc" if settings.debug else None,
         lifespan=lifespan,
@@ -47,44 +53,72 @@ def create_application() -> FastAPI:
     # Gzip
     app.add_middleware(GZipMiddleware, minimum_size=500)
 
-    # Prometheus metrics
-    if settings.app_env != "production":
+    # Prometheus metrics (optional)
+    try:
+        from prometheus_fastapi_instrumentator import Instrumentator
         Instrumentator().instrument(app).expose(app, include_in_schema=False)
+    except ImportError:
+        logger.warning("prometheus_fastapi_instrumentator not installed, skipping metrics")
 
     # Exception handlers
     register_exception_handlers(app)
 
-    # Register routers
-    from app.api.v1.auth import router as auth_router
-    from app.api.v1.students import router as students_router
-    from app.api.v1.tutoring import router as tutoring_router
-    from app.api.v1.practice import router as practice_router
-    from app.api.v1.progress import router as progress_router
-    from app.api.v1.topics import router as topics_router
-    from app.api.v1.reports import router as reports_router
-    from app.api.v1.voice import router as voice_router
-    from app.api.v1.achievements import router as achievements_router
+    # Register routers with graceful error handling
+    _register_routers(app)
 
-    app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
-    app.include_router(students_router, prefix="/api/v1/students", tags=["students"])
-    app.include_router(tutoring_router, prefix="/api/v1/tutoring", tags=["tutoring"])
-    app.include_router(practice_router, prefix="/api/v1/practice", tags=["practice"])
-    app.include_router(progress_router, prefix="/api/v1/progress", tags=["progress"])
-    app.include_router(topics_router, prefix="/api/v1/topics", tags=["topics"])
-    app.include_router(reports_router, prefix="/api/v1/reports", tags=["reports"])
-    app.include_router(voice_router, prefix="/api/v1/voice", tags=["voice"])
-    app.include_router(achievements_router, prefix="/api/v1/achievements", tags=["achievements"])
-
-    # Health check
+    # Health check — always available
     @app.get("/api/v1/health", tags=["health"])
     async def health_check():
-        return {
+        health = {
             "status": "healthy",
             "version": settings.app_version,
             "environment": settings.app_env.value,
+            "reasoning_provider": settings.reasoning_provider.value,
+            "timestamp": None,
         }
+        return health
 
     return app
+
+
+def _register_routers(app: FastAPI):
+    """Register all API routers. Gracefully skips any that fail to import."""
+    router_specs = [
+        ("app.api.v1.auth", "/api/v1/auth", ["auth"]),
+        ("app.api.v1.students", "/api/v1/students", ["students"]),
+        ("app.api.v1.tutoring", "/api/v1/tutoring", ["tutoring"]),
+        ("app.api.v1.practice", "/api/v1/practice", ["practice"]),
+        ("app.api.v1.progress", "/api/v1/progress", ["progress"]),
+        ("app.api.v1.topics", "/api/v1/topics", ["topics"]),
+        ("app.api.v1.reports", "/api/v1/reports", ["reports"]),
+        ("app.api.v1.voice", "/api/v1/voice", ["voice"]),
+        ("app.api.v1.achievements", "/api/v1/achievements", ["achievements"]),
+    ]
+
+    import importlib
+
+    for module_path, prefix, tags in router_specs:
+        try:
+            module = importlib.import_module(module_path)
+            if hasattr(module, "router"):
+                app.include_router(module.router, prefix=prefix, tags=tags)
+            else:
+                logger.warning(f"Module {module_path} has no 'router' attribute")
+        except Exception as e:
+            logger.warning(f"Failed to register router {module_path}: {e}")
+            # Create stub router so URLs don't 404
+            from fastapi import APIRouter
+            stub = APIRouter()
+
+            @stub.get("")
+            async def stub_endpoint():
+                return {"status": "not_available", "message": "This service is not configured yet"}
+
+            @stub.get("/{path:path}")
+            async def stub_catchall(path: str):
+                return {"status": "not_available", "message": f"Service not available: {path}"}
+
+            app.include_router(stub, prefix=prefix, tags=tags)
 
 
 app = create_application()

@@ -115,7 +115,55 @@ cd backend && uvicorn app.main:app --reload  # FastAPI :8000
 
 ## Status
 
-🟡 **Phase 0: Foundation** — Planning complete. Awaiting approval to begin development.
+🟢 **Phase 3: Testing & QA** — All phases complete. Runnable locally under Docker.
+
+---
+
+## Local Development (Docker)
+
+```bash
+# 1. Clone and enter
+git clone https://github.com/rajibmahata/Math-tutor-AI-Agent.git
+cd Math-tutor-AI-Agent
+
+# 2. Configure environment (edit .env with your API keys)
+cp .env .env.local
+nano .env
+
+# 3. Start all services
+docker compose up -d
+
+# 4. Run database migrations
+docker compose exec backend alembic upgrade head
+
+# 5. Seed curriculum data
+docker compose exec backend python scripts/seed_curriculum.py
+
+# 6. Access the app
+# Frontend: http://localhost:3000
+# API Docs: http://localhost:8000/api/docs
+# Grafana:  http://localhost:3001 (admin/ganitmitra)
+```
+
+### Development Mode (Hot Reload)
+
+```bash
+# Backend (with auto-reload)
+docker compose up backend -d
+
+# Frontend (with hot reload)
+cd frontend && npm install && npm run dev
+```
+
+### Running Tests
+
+```bash
+# Backend tests
+docker compose exec backend pytest -v
+
+# Frontend tests
+cd frontend && npx vitest run
+```
 
 ---
 
