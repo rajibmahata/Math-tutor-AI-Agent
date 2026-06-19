@@ -39,6 +39,12 @@ def verify_answer(student_answer: str, question: str) -> dict:
             convert_xor,
         )
 
+        # Before parsing, replace standalone 'x' between numbers with '*'
+        # "6 x 4" → "6 * 4", but not "2x + 3" → "2* + 3"
+        import re as _re
+        student_expr = _re.sub(r'(\d)\s+x\s+(\d)', r'\1 * \2', student_expr)
+        question_expr = _re.sub(r'(\d)\s+x\s+(\d)', r'\1 * \2', question_expr)
+
         # Parse and evaluate
         student_parsed = parse_expr(student_expr, transformations=transformations)
         question_parsed = parse_expr(question_expr, transformations=transformations)
@@ -94,11 +100,11 @@ def _extract_math(text: str) -> str | None:
 
     # Try basic arithmetic: "number operator number"
     arith_match = re.match(
-        r"^(-?\d+\.?\d*)\s*([+\-*/×÷])\s*(-?\d+\.?\d*)$", text
+        r"^(-?\d+\.?\d*)\s*([+\-*/×÷xX])\s*(-?\d+\.?\d*)$", text
     )
     if arith_match:
         a, op, b = arith_match.groups()
-        op_map = {"×": "*", "÷": "/", "x": "*"}
+        op_map = {"×": "*", "÷": "/", "x": "*", "X": "*"}
         op = op_map.get(op, op)
         return f"({a}) {op} ({b})"
 

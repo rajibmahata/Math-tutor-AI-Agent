@@ -429,13 +429,14 @@ async def chat_endpoint(
     else:
         session_id = UUID(body.session_id)
 
-    # Save student message
-    await tutoring.save_message(
-        session_id=session_id,
-        role="student",
-        content=body.message,
-        content_type="text",
-    )
+    # Save student message (except for evaluate — it saves its own)
+    if body.action != "evaluate":
+        await tutoring.save_message(
+            session_id=session_id,
+            role="student",
+            content=body.message,
+            content_type="text",
+        )
 
     try:
         if body.action == "greeting":

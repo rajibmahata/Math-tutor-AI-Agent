@@ -207,13 +207,22 @@ class TutoringService:
             content_type="text",
         )
 
-        # Get recent context for evaluation
-        recent = await self.get_session_messages(session_id, limit=5)
+        # Get recent context for evaluation — find the student's ORIGINAL question
+        recent = await self.get_session_messages(session_id, limit=10)
         last_question = None
+        # Scan backwards to find the student's math question (before any hints/answers)
         for m in reversed(recent):
-            if m.role == "teacher" and m.content_type in ("hint", "text"):
-                last_question = m.content
-                break
+            if m.role == "student" and m.content_type == "text":
+                # Use the first student message that looks like a question
+                if any(c.isdigit() for c in m.content) or len(m.content) > 10:
+                    last_question = m.content
+                    break
+        # Fallback: use the most recent student message that isn't the current answer
+        if not last_question:
+            for m in reversed(recent):
+                if m.role == "student" and m.content != student_answer:
+                    last_question = m.content
+                    break
 
         # Evaluate the answer
         evaluation = await self._evaluate_answer(
