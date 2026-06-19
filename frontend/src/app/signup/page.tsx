@@ -12,7 +12,7 @@ export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"student" | "parent">("student");
+  const [role, setRole] = useState<"student" | "tutor" | "principal" | "parent">("student");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -23,7 +23,10 @@ export default function SignupPage() {
     try {
       const data = await authSignup(email, password, name, role);
       login(data.user, data.access_token, data.refresh_token);
-      router.push(role === "student" ? "/onboarding" : "/parent");
+      if (role === "tutor") router.push("/tutor");
+      else if (role === "principal") router.push("/principal");
+      else if (role === "student") router.push("/onboarding");
+      else router.push("/parent");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Signup failed");
     } finally {
@@ -44,10 +47,10 @@ export default function SignupPage() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">I am a...</label>
             <div className="grid grid-cols-2 gap-2">
-              {(["student", "parent"] as const).map((r) => (
+              {(["student", "tutor", "principal", "parent"] as const).map((r) => (
                 <button key={r} type="button" onClick={() => setRole(r)}
-                  className={`rounded-xl px-4 py-3 text-center font-medium transition-colors ${role === r ? "bg-primary-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
-                  {r === "student" ? "👩‍🎓 Student" : "👨‍👩‍👧 Parent"}
+                  className={`rounded-xl px-3 py-3 text-center text-sm font-medium transition-colors ${role === r ? "bg-primary-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
+                  {r === "student" ? "👩‍🎓 Student" : r === "tutor" ? "👨‍🏫 Tutor" : r === "principal" ? "👨‍💼 Principal" : "👨‍👩‍👧 Parent"}
                 </button>
               ))}
             </div>

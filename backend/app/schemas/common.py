@@ -14,7 +14,7 @@ class SignupRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
     full_name: str = Field(min_length=1, max_length=255)
-    role: Literal["student", "parent"] = "student"
+    role: Literal["student", "tutor", "principal", "parent", "admin"] = "student"
 
 
 class LoginRequest(BaseModel):
@@ -24,7 +24,7 @@ class LoginRequest(BaseModel):
 
 class GoogleAuthRequest(BaseModel):
     id_token: str
-    role: Literal["student", "parent"] = "student"
+    role: Literal["student", "tutor", "principal", "parent", "admin"] = "student"
 
 
 class RefreshRequest(BaseModel):

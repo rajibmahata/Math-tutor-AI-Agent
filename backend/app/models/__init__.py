@@ -15,6 +15,9 @@ from app.models.parent_report import ParentReport
 from app.models.student_achievement import StudentAchievement
 from app.models.knowledge_document import KnowledgeDocument
 
+from app.models.tutor import Tutor, TutorDocument, Principal
+from app.models.content import CurriculumNode, SourceDocument, ContentLesson, ContentReview, ApprovalWorkflow
+
 __all__ = [
     "User",
     "RefreshToken",
@@ -30,4 +33,12 @@ __all__ = [
     "ParentReport",
     "StudentAchievement",
     "KnowledgeDocument",
+    "Tutor",
+    "TutorDocument",
+    "Principal",
+    "CurriculumNode",
+    "SourceDocument",
+    "ContentLesson",
+    "ContentReview",
+    "ApprovalWorkflow",
 ]
