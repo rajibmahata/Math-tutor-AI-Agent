@@ -119,10 +119,11 @@ class AuthService:
         role: str = "student",
     ) -> tuple[User, str, str, bool]:
         """Authenticate via Google OAuth. Returns (user, access_token, refresh_token, is_new)."""
+        from sqlalchemy import or_
         # Try to find existing user
         result = await self.db.execute(
             select(User).where(
-                (User.google_id == google_id) | (User.email == email)
+                or_(User.google_id == google_id, User.email == email)
             )
         )
         user = result.scalar_one_or_none()

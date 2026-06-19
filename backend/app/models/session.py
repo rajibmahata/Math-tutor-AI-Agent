@@ -45,6 +45,6 @@ class Session(Base):
     )
 
     # Relationships
-    student = relationship("Student", back_populates="sessions")
+    student = relationship("Student")
     topic = relationship("Topic")
-    messages = relationship("Message", back_populates="session", cascade="all, delete-orphan")
+    messages = relationship("Message")

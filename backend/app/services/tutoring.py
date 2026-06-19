@@ -11,6 +11,7 @@ from sqlalchemy import select
 from fastapi import WebSocket, WebSocketDisconnect
 
 from app.models.student import Student
+from app.models.user import User
 from app.models.session import Session
 from app.models.message import Message
 from app.models.topic import Topic
@@ -372,8 +373,11 @@ Respond with exactly ONE word: greeting, learn, or progress.""" },
     async def _handle_greeting(self, student: Student, language: str) -> dict:
         """Handle a greeting/chat message."""
         student_name = ""
-        if hasattr(student, 'user') and student.user:
-            student_name = student.user.full_name
+        # Get student name from user table
+        result = await self.db.execute(select(User).where(User.id == student.user_id))
+        user = result.scalar_one_or_none()
+        if user:
+            student_name = user.full_name
 
         greetings = {
             "en": f"Hi {student_name or 'there'}! Ready to learn some math today? What would you like to practice? 😊",

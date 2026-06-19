@@ -51,7 +51,7 @@ class Assessment(Base):
     )
 
     # Relationships
-    message = relationship("Message", back_populates="assessment")
-    student = relationship("Student", back_populates="assessments")
+    message = relationship("Message")
+    student = relationship("Student")
     topic = relationship("Topic", foreign_keys=[topic_id])
     prerequisite_topic = relationship("Topic", foreign_keys=[prerequisite_topic_id])

@@ -36,5 +36,5 @@ class Message(Base):
     )
 
     # Relationships
-    session = relationship("Session", back_populates="messages")
-    assessment = relationship("Assessment", back_populates="message", uselist=False, cascade="all, delete-orphan")
+    session = relationship("Session")
+    assessment = relationship("Assessment")

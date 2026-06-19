@@ -30,4 +30,4 @@ class StudentAchievement(Base):
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
-    student = relationship("Student", back_populates="achievements")
+    student = relationship("Student")

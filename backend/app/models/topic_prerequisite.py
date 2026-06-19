@@ -30,5 +30,5 @@ class TopicPrerequisite(Base):
         String(20), nullable=False, default="required"
     )
 
-    topic = relationship("Topic", foreign_keys=[topic_id], back_populates="prerequisites")
-    prerequisite = relationship("Topic", foreign_keys=[prerequisite_id], back_populates="required_by")
+    topic = relationship("Topic", foreign_keys=[topic_id])
+    prerequisite = relationship("Topic", foreign_keys=[prerequisite_id])

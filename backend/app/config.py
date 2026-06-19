@@ -54,6 +54,7 @@ class Settings(BaseSettings):
     # =========================================================================
     # Database
     # =========================================================================
+    raw_database_url: str = Field(default="", alias="DATABASE_URL")
     postgres_host: str = Field(default="localhost", alias="POSTGRES_HOST")
     postgres_port: int = Field(default=5432, alias="POSTGRES_PORT")
     postgres_db: str = Field(default="ganitmitra", alias="POSTGRES_DB")
@@ -62,6 +63,8 @@ class Settings(BaseSettings):
 
     @property
     def database_url(self) -> str:
+        if self.raw_database_url:
+            return self.raw_database_url
         return (
             f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}"
             f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"

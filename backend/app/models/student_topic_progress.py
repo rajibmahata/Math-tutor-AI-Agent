@@ -41,5 +41,5 @@ class StudentTopicProgress(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
 
-    student = relationship("Student", back_populates="topic_progress")
+    student = relationship("Student")
     topic = relationship("Topic")

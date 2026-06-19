@@ -38,6 +38,6 @@ class PracticeSet(Base):
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
-    student = relationship("Student", back_populates="practice_sets")
+    student = relationship("Student")
     topic = relationship("Topic")
-    questions = relationship("PracticeQuestion", back_populates="practice_set", cascade="all, delete-orphan")
+    questions = relationship("PracticeQuestion")
