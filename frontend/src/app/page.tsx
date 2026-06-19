@@ -28,10 +28,13 @@ export default function HomePage() {
 
         {/* Quick Links */}
         <div className="flex flex-wrap gap-3 justify-center">
-          <a href="/login" className="btn-primary">
+          <a href="/demo" className="btn-primary">
+            📱 View Demo
+          </a>
+          <a href="/login" className="btn-secondary">
             Start Learning →
           </a>
-          <a href="/signup" className="btn-secondary">
+          <a href="/signup" className="btn-ghost">
             Create Account
           </a>
         </div>
