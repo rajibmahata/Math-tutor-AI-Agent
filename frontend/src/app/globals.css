@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Nunito — Headings */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+/* Inter — Body */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Noto Sans Devanagari — Hindi */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
+
+/* Noto Sans Bengali — Bengali */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap');
+
+@layer base {
+  * {
+    @apply border-gray-200;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900 font-body antialiased;
+  }
+
+  :lang(hi) {
+    font-family: 'Noto Sans Devanagari', 'Nunito', sans-serif;
+  }
+
+  :lang(bn) {
+    font-family: 'Noto Sans Bengali', 'Nunito', sans-serif;
+  }
+}
+
+@layer components {
+  /* Chat bubbles */
+  .chat-bubble-student {
+    @apply bg-primary-500 text-white rounded-2xl rounded-br-md px-4 py-3 max-w-[80%] ml-auto;
+  }
+
+  .chat-bubble-teacher {
+    @apply bg-white border border-gray-200 rounded-2xl rounded-bl-md px-4 py-3 max-w-[85%];
+  }
+
+  .chat-bubble-hint {
+    @apply bg-primary-50 border border-primary-200 rounded-2xl rounded-bl-md px-4 py-3 max-w-[85%];
+  }
+
+  .chat-bubble-success {
+    @apply bg-success-50 border border-success-500/30 rounded-2xl rounded-bl-md px-4 py-3 max-w-[85%];
+  }
+
+  /* Cards */
+  .card {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-6;
+  }
+
+  .card-hover {
+    @apply card hover:shadow-md hover:border-primary-200 transition-all duration-200 cursor-pointer;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply bg-primary-600 text-white rounded-xl px-6 py-3 font-semibold
+           hover:bg-primary-700 active:bg-primary-800 transition-colors
+           disabled:opacity-50 disabled:cursor-not-allowed
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-primary-600 border border-primary-200 rounded-xl px-6 py-3 font-semibold
+           hover:bg-primary-50 active:bg-primary-100 transition-colors
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+  }
+
+  .btn-ghost {
+    @apply text-gray-600 rounded-xl px-4 py-2 font-medium
+           hover:bg-gray-100 active:bg-gray-200 transition-colors;
+  }
+
+  /* Input */
+  .input-field {
+    @apply w-full rounded-xl border border-gray-200 px-4 py-3 text-base
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
+           placeholder:text-gray-400 disabled:bg-gray-100;
+  }
+}
+
+/* KaTeX math rendering */
+.katex {
+  font-size: 1.1em !important;
+}
+
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5rem 0;
+}
+
+/* Animations */
+@keyframes confetti {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(-100px) rotate(720deg); opacity: 0; }
+}
+
+.animate-confetti {
+  animation: confetti 1s ease-out forwards;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
