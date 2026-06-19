@@ -70,6 +70,23 @@ async def get_tutor(tutor_id: str, db: AsyncSession = Depends(get_db)):
     }
 
 
+@router.get("/dashboard")
+async def my_tutor_dashboard(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get dashboard for the currently logged-in tutor."""
+    r = await db.execute(select(Tutor).where(Tutor.user_id == current_user.id))
+    tutor = r.scalar_one_or_none()
+    if not tutor:
+        raise HTTPException(status_code=404, detail="Tutor profile not found. Register first.")
+    return {
+        "tutor_id": str(tutor.id), "assigned_students": tutor.total_students or 0,
+        "rating": tutor.rating, "verification_status": tutor.verification_status,
+        "subjects": tutor.subjects, "experience_yrs": tutor.experience_yrs,
+    }
+
+
 @router.get("/{tutor_id}/dashboard")
 async def tutor_dashboard(tutor_id: str, db: AsyncSession = Depends(get_db)):
     tid = uuid.UUID(tutor_id)
