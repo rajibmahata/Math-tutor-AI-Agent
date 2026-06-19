@@ -1,93 +1,46 @@
 export default function HomePage() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8">
-      <div className="text-center max-w-lg animate-bounce-in">
-        {/* Logo */}
-        <div className="mb-8 text-7xl">🧮</div>
+    <main className="flex-1 flex flex-col items-center justify-center p-6 bg-gradient-to-b from-primary-50 to-white">
+      <div className="text-center animate-bounce-in">
+        <div className="text-6xl mb-6">🧮</div>
+        <h1 className="text-3xl font-heading font-extrabold text-primary-700 mb-2">VidyaMitra</h1>
+        <p className="text-base font-heading font-semibold text-gray-500 mb-1">विद्या मित्र · বিদ্যা মিত্র</p>
+        <p className="text-sm text-gray-400 mb-8">AI Student Tutor Platform</p>
 
-        <h1 className="text-4xl font-heading font-extrabold text-primary-700 mb-4">
-          GanitMitra
-        </h1>
-        <p className="text-2xl font-heading font-semibold text-gray-600 mb-2">
-          गणित मित्र · গণিত মিত্র
-        </p>
-        <p className="text-lg text-gray-500 mb-8">
-          Your AI Math Friend — Learning in English, Hindi & Bengali
-        </p>
-
-        {/* Status — Production Ready */}
-        <div className="card mb-8">
-          <div className="flex items-center gap-3 justify-center">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-500 opacity-75" />
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-success-500" />
-            </span>
-            <span className="text-sm text-gray-500">v1.0 — Production Ready</span>
-          </div>
+        {/* Status */}
+        <div className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border border-gray-100 mb-8">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
+          </span>
+          <span className="text-xs font-medium text-gray-500">v2.0 — Production Ready</span>
         </div>
 
-        {/* Quick Links */}
-        <div className="flex flex-wrap gap-3 justify-center">
-          <a href="/demo" className="btn-primary">
-            📱 View Demo
-          </a>
-          <a href="/login" className="btn-secondary">
-            Start Learning →
-          </a>
-          <a href="/signup" className="btn-ghost">
-            Create Account
-          </a>
+        <div className="flex flex-col gap-3 w-full max-w-xs mx-auto">
+          <a href="/signup" className="btn-primary text-base py-3.5">Get Started Free →</a>
+          <a href="/login" className="btn-secondary text-base py-3.5">Sign In</a>
         </div>
 
         {/* Features */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-12">
-          <div className="card text-center">
-            <div className="text-3xl mb-2">🧑‍🏫</div>
-            <h3 className="font-semibold text-gray-700">8 AI Agents</h3>
-            <p className="text-sm text-gray-500">Specialized tutoring</p>
-          </div>
-          <div className="card text-center">
-            <div className="text-3xl mb-2">🌐</div>
-            <h3 className="font-semibold text-gray-700">3 Languages</h3>
-            <p className="text-sm text-gray-500">EN · हिंदी · বাংলা</p>
-          </div>
-          <div className="card text-center">
-            <div className="text-3xl mb-2">📊</div>
-            <h3 className="font-semibold text-gray-700">Nursery to 10</h3>
-            <p className="text-sm text-gray-500">Full K-10 math</p>
-          </div>
+        <div className="grid grid-cols-2 gap-3 mt-8 w-full max-w-xs mx-auto">
+          {[
+            { icon: "🧑‍🏫", title: "12 AI Agents" },
+            { icon: "👨‍🏫", title: "Tutor Verified" },
+            { icon: "🌐", title: "4 Languages" },
+            { icon: "🎤", title: "Voice Ready" },
+          ].map((f) => (
+            <div key={f.title} className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 text-center">
+              <div className="text-2xl mb-1">{f.icon}</div>
+              <p className="text-xs font-medium text-gray-600">{f.title}</p>
+            </div>
+          ))}
         </div>
 
-        {/* More Features */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
-          <div className="card text-center py-3">
-            <div className="text-xl mb-1">🎤</div>
-            <p className="text-xs text-gray-500">Voice Ready</p>
-          </div>
-          <div className="card text-center py-3">
-            <div className="text-xl mb-1">🔐</div>
-            <p className="text-xs text-gray-500">Secure Auth</p>
-          </div>
-          <div className="card text-center py-3">
-            <div className="text-xl mb-1">📊</div>
-            <p className="text-xs text-gray-500">Progress Tracking</p>
-          </div>
-          <div className="card text-center py-3">
-            <div className="text-xl mb-1">👨‍👩‍👧</div>
-            <p className="text-xs text-gray-500">Parent Reports</p>
-          </div>
+        <div className="flex gap-4 justify-center mt-6">
+          <a href="/demo" className="text-xs text-primary-500 hover:underline">📱 Demo</a>
+          <a href="/tutor" className="text-xs text-teal-600 hover:underline">👨‍🏫 Tutor</a>
+          <a href="/admin" className="text-xs text-slate-600 hover:underline">⚡ Admin</a>
         </div>
-
-        {/* Footer */}
-        <p className="text-xs text-gray-400 mt-12">
-          <a href="https://github.com/rajibmahata/Math-tutor-AI-Agent" target="_blank" rel="noopener noreferrer" className="hover:text-primary-500 transition-colors">
-            GitHub
-          </a>
-          {" · "}
-          <a href="http://localhost:8000/api/docs" target="_blank" rel="noopener noreferrer" className="hover:text-primary-500 transition-colors">
-            API Docs
-          </a>
-        </p>
       </div>
     </main>
   );

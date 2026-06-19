@@ -2,7 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Nunito — Headings */
+/* =========================================================================
+   Mobile App Frame
+   ========================================================================= */
+
+@layer components {
+  .app-frame {
+    @apply w-full max-w-[430px] h-[92vh] max-h-[932px] bg-white rounded-[2rem] 
+           shadow-2xl shadow-black/30 overflow-hidden flex flex-col
+           border-[6px] border-gray-800 relative;
+  }
+
+  .status-bar {
+    @apply bg-gray-800 text-white flex justify-between items-center px-6 py-1.5
+           text-xs font-medium flex-shrink-0;
+  }
+
+  .app-content {
+    @apply flex-1 overflow-hidden flex flex-col bg-gray-50;
+  }
+}
+
+@media (max-width: 460px) {
+  .app-frame {
+    @apply max-w-full h-screen max-h-screen rounded-none border-0 shadow-none;
+  }
+  .status-bar {
+    @apply hidden;
+  }
+}
+
+/* =========================================================================
+   Nunito — Headings
+   ========================================================================= */
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
 
 /* Inter — Body */

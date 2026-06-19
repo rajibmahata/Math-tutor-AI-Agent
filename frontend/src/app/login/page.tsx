@@ -15,47 +15,37 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+    e.preventDefault(); setError(""); setLoading(true);
     try {
       const data = await authLogin(email, password);
       login(data.user, data.access_token, data.refresh_token);
-      router.push(data.user.role === "parent" ? "/parent" : "/dashboard");
+      const r = data.user.role;
+      if (r === "tutor") router.push("/tutor");
+      else if (r === "principal") router.push("/principal");
+      else if (r === "admin") router.push("/admin");
+      else router.push("/dashboard");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Login failed");
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-primary-50 to-white">
-      <div className="w-full max-w-md">
+    <main className="flex-1 flex flex-col items-center justify-center p-6 bg-gradient-to-b from-primary-50 to-white">
+      <div className="w-full max-w-xs">
         <div className="text-center mb-8">
-          <div className="text-6xl mb-4">🧮</div>
-          <h1 className="text-3xl font-heading font-extrabold text-primary-700">GanitMitra</h1>
-          <p className="text-gray-500 mt-2">Your AI Math Friend</p>
+          <div className="text-5xl mb-3">🧮</div>
+          <h1 className="text-2xl font-heading font-extrabold text-primary-700">VidyaMitra</h1>
+          <p className="text-sm text-gray-400 mt-1">Welcome back!</p>
         </div>
-        <form onSubmit={handleSubmit} className="card space-y-4">
-          {error && <div className="bg-error-50 border border-error-500/30 text-error-600 rounded-xl p-3 text-sm text-center">{error}</div>}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" placeholder="demo@ganitmitra.com" required />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="input-field" placeholder="testpass123" required minLength={8} />
-          </div>
-          <button type="submit" disabled={loading} className="btn-primary w-full">{loading ? "Signing in..." : "Sign In →"}</button>
-          <p className="text-center text-sm text-gray-500">
-            New here?{" "}<Link href="/signup" className="text-primary-600 font-medium hover:underline">Create account</Link>
-          </p>
-          <div className="text-center text-xs text-gray-400">
-            Demo: demo@ganitmitra.com / testpass123
-          </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl p-3 text-xs text-center">{error}</div>}
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" placeholder="Email" required />
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="input-field" placeholder="Password" required minLength={8} />
+          <button type="submit" disabled={loading} className="btn-primary w-full text-base py-3.5 rounded-2xl">{loading ? "Signing in..." : "Sign In →"}</button>
+          <p className="text-center text-xs text-gray-400">New here?{" "}<Link href="/signup" className="text-primary-600 font-medium">Create account</Link></p>
         </form>
       </div>
-    </div>
+    </main>
   );
 }
