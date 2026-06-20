@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store";
 import { cn, gradeDisplay } from "@/lib/utils";
 
-const API = "http://localhost:8000/api/v1";
+const API = "http://localhost:8000/api";
 
 interface StudentData {
   id: string; grade: string; preferred_language: string; accuracy_rate: number;

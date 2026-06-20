@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { Language } from "@/types";
 
-const API = "http://localhost:8000/api/v1";
+const API = "http://localhost:8000/api";
 
 // =============================================================================
 // Multi-language content

@@ -35,7 +35,7 @@ export async function apiCall<T = unknown>(
     requestHeaders["Authorization"] = `Bearer ${token}`;
   }
 
-  const url = `${API_BASE}/api/v1${endpoint}`;
+  const url = `${API_BASE}/api${endpoint}`;
 
   const response = await fetch(url, {
     method,
@@ -157,7 +157,7 @@ export async function textToSpeech(text: string, language = "en", voiceStyle = "
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const res = await fetch(`${API_BASE}/api/v1/voice/tts`, {
+  const res = await fetch(`${API_BASE}/api/voice/tts`, {
     method: "POST",
     headers,
     body: JSON.stringify({ text, language, voice_style: voiceStyle }),
@@ -175,7 +175,7 @@ export async function speechToText(audioBlob: Blob, language?: string): Promise<
   const headers: Record<string, string> = {};
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const res = await fetch(`${API_BASE}/api/v1/voice/stt`, {
+  const res = await fetch(`${API_BASE}/api/voice/stt`, {
     method: "POST",
     headers,
     body: formData,

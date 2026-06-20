@@ -67,7 +67,7 @@ def create_application() -> FastAPI:
     _register_routers(app)
 
     # Health check — always available
-    @app.get("/api/v1/health", tags=["health"])
+    @app.get("/api/health", tags=["health"])
     async def health_check():
         health = {
             "status": "healthy",
@@ -84,19 +84,19 @@ def create_application() -> FastAPI:
 def _register_routers(app: FastAPI):
     """Register all API routers. Gracefully skips any that fail to import."""
     router_specs = [
-        ("app.api.v1.auth", "/api/v1/auth", ["auth"]),
-        ("app.api.v1.students", "/api/v1/students", ["students"]),
-        ("app.api.v1.tutoring", "/api/v1/tutoring", ["tutoring"]),
-        ("app.api.v1.practice", "/api/v1/practice", ["practice"]),
-        ("app.api.v1.progress", "/api/v1/progress", ["progress"]),
-        ("app.api.v1.topics", "/api/v1/topics", ["topics"]),
-        ("app.api.v1.reports", "/api/v1/reports", ["reports"]),
-        ("app.api.v1.voice", "/api/v1/voice", ["voice"]),
-        ("app.api.v1.achievements", "/api/v1/achievements", ["achievements"]),
-        ("app.api.v1.tutors", "/api/v1/tutors", ["tutors"]),
-        ("app.api.v1.admin", "/api/v1/admin", ["admin"]),
-        ("app.api.v1.content", "/api/v1/content", ["content"]),
-        ("app.api.v1.notifications", "/api/v1/notifications", ["notifications"]),
+        ("app.api.v1.auth", "/api/auth", ["auth"]),
+        ("app.api.v1.students", "/api/students", ["students"]),
+        ("app.api.v1.tutoring", "/api/tutoring", ["tutoring"]),
+        ("app.api.v1.practice", "/api/practice", ["practice"]),
+        ("app.api.v1.progress", "/api/progress", ["progress"]),
+        ("app.api.v1.topics", "/api/topics", ["topics"]),
+        ("app.api.v1.reports", "/api/reports", ["reports"]),
+        ("app.api.v1.voice", "/api/voice", ["voice"]),
+        ("app.api.v1.achievements", "/api/achievements", ["achievements"]),
+        ("app.api.v1.tutors", "/api/tutors", ["tutors"]),
+        ("app.api.v1.admin", "/api/admin", ["admin"]),
+        ("app.api.v1.content", "/api/content", ["content"]),
+        ("app.api.v1.notifications", "/api/notifications", ["notifications"]),
     ]
 
     import importlib

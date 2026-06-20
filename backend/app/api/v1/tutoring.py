@@ -39,7 +39,7 @@ async def start_session(
         )
         await db.commit()
 
-        ws_endpoint = f"ws://localhost:8000/api/v1/ws/sessions/{session.id}?token=demo"
+        ws_endpoint = f"ws://localhost:8000/api/ws/sessions/{session.id}?token=demo"
 
         return {
             "id": str(session.id),

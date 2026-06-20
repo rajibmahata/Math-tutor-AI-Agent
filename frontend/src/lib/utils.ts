@@ -71,7 +71,7 @@ export async function apiRequest<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE}/api/v1${endpoint}`, {
+  const response = await fetch(`${API_BASE}/api${endpoint}`, {
     ...options,
     headers,
   });

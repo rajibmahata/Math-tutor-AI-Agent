@@ -1,6 +1,6 @@
 # API Specification — AI Student Tutor Platform v2.1 (Revised)
 
-> **Date:** 2026-06-20 | **Version:** 2.1 | **Base URL:** `/api/v1`
+> **Date:** 2026-06-20 | **Version:** 2.1 | **Base URL:** `/api`
 
 ---
 
@@ -10,7 +10,7 @@
 |-----------|---------------|
 | **Resource-Oriented** | RESTful endpoints for CRUD resources |
 | **WebSocket for Real-Time** | Tutoring sessions use WS for streaming |
-| **Versioned** | `/api/v1/` prefix |
+| **Versioned** | `/api/` prefix |
 | **Consistent Errors** | RFC 7807 Problem Details |
 | **Pagination** | Cursor-based for lists |
 | **Rate Limiting** | Headers: `X-RateLimit-*` |
@@ -25,7 +25,7 @@
 ### 2.1 Register (Any Role)
 
 ```
-POST /api/v1/auth/register
+POST /api/auth/register
 Content-Type: application/json
 
 Request:
@@ -54,7 +54,7 @@ Response (201):
 ### 2.2 Login
 
 ```
-POST /api/v1/auth/login
+POST /api/auth/login
 
 Request: { "email": "user@example.com", "password": "***" }
 
@@ -97,7 +97,7 @@ Response (200):
 ### 3.1 Create Student Profile
 
 ```
-POST /api/v1/students
+POST /api/students
 Authorization: Bearer <token>
 
 Request:
@@ -121,7 +121,7 @@ Response (201): { ... student digital twin v2 ... }
 ### 3.2 Get Student Digital Twin v2
 
 ```
-GET /api/v1/students/{student_id}
+GET /api/students/{student_id}
 Authorization: Bearer <token>
 
 Response (200):
@@ -157,7 +157,7 @@ Response (200):
 ### 3.3 Student Dashboard
 
 ```
-GET /api/v1/students/{student_id}/dashboard
+GET /api/students/{student_id}/dashboard
 Authorization: Bearer <token>
 
 Response (200):
@@ -196,7 +196,7 @@ Response (200):
 ### 4.1 Tutor Registration
 
 ```
-POST /api/v1/tutors/register
+POST /api/tutors/register
 Authorization: Bearer <token>
 Content-Type: multipart/form-data
 
@@ -226,7 +226,7 @@ Response (201):
 ### 4.2 Tutor Verification (AI → Principal → Admin)
 
 ```
-GET /api/v1/tutors/{tutor_id}/verification
+GET /api/tutors/{tutor_id}/verification
 Authorization: Bearer <principal_token>
 
 Response (200):
@@ -250,7 +250,7 @@ Response (200):
   }
 }
 
-POST /api/v1/tutors/{tutor_id}/approve
+POST /api/tutors/{tutor_id}/approve
 Authorization: Bearer <principal_or_admin_token>
 
 Request: { "action": "approve", "notes": "Qualified. Approved." }
@@ -260,7 +260,7 @@ Response (200): { "status": "approved", "tutor_activated": true }
 ### 4.3 Tutor Dashboard
 
 ```
-GET /api/v1/tutors/{tutor_id}/dashboard
+GET /api/tutors/{tutor_id}/dashboard
 Authorization: Bearer <tutor_token>
 
 Response (200):
@@ -290,7 +290,7 @@ Response (200):
 ### 4.4 Tutor Feedback
 
 ```
-POST /api/v1/tutors/{tutor_id}/feedback
+POST /api/tutors/{tutor_id}/feedback
 Authorization: Bearer <tutor_token>
 
 Request:
@@ -310,7 +310,7 @@ Response (201): { "status": "submitted" }
 ### 4.5 Tutor Reassignment
 
 ```
-POST /api/v1/tutors/{tutor_id}/reassign
+POST /api/tutors/{tutor_id}/reassign
 Authorization: Bearer <tutor_token>
 
 Request:
@@ -332,7 +332,7 @@ Response (200): {
 ### 5.1 Principal Dashboard
 
 ```
-GET /api/v1/principals/{principal_id}/dashboard
+GET /api/principals/{principal_id}/dashboard
 Authorization: Bearer <principal_token>
 
 Response (200):
@@ -363,7 +363,7 @@ Response (200):
 ### 5.2 Monitor Tutors
 
 ```
-GET /api/v1/principals/{principal_id}/tutors
+GET /api/principals/{principal_id}/tutors
 Authorization: Bearer <principal_token>
 
 Response (200):
@@ -386,7 +386,7 @@ Response (200):
 ### 5.3 Quality Assurance
 
 ```
-POST /api/v1/principals/{principal_id}/escalations/{escalation_id}/resolve
+POST /api/principals/{principal_id}/escalations/{escalation_id}/resolve
 Authorization: Bearer <principal_token>
 
 Request:
@@ -406,7 +406,7 @@ Response (200): { "status": "resolved" }
 ### 6.1 Admin Dashboard
 
 ```
-GET /api/v1/admin/dashboard
+GET /api/admin/dashboard
 Authorization: Bearer <admin_token>
 
 Response (200):
@@ -437,7 +437,7 @@ Response (200):
 ### 6.2 User Management
 
 ```
-GET /api/v1/admin/users?role=tutor&status=pending&limit=20
+GET /api/admin/users?role=tutor&status=pending&limit=20
 Authorization: Bearer <admin_token>
 
 Response (200):
@@ -448,7 +448,7 @@ Response (200):
   "pagination": { "next_cursor": "...", "has_more": false }
 }
 
-PATCH /api/v1/admin/users/{user_id}
+PATCH /api/admin/users/{user_id}
 Authorization: Bearer <admin_token>
 
 Request: { "is_active": false }
@@ -458,7 +458,7 @@ Response (200): { "updated": true }
 ### 6.3 Organization Analytics
 
 ```
-GET /api/v1/admin/analytics?period=30d
+GET /api/admin/analytics?period=30d
 Authorization: Bearer <admin_token>
 
 Response (200):
@@ -493,7 +493,7 @@ Response (200):
 ### 7.1 Upload Source Document (PDF)
 
 ```
-POST /api/v1/content/upload
+POST /api/content/upload
 Authorization: Bearer <admin_or_tutor_token>
 Content-Type: multipart/form-data
 
@@ -515,7 +515,7 @@ Response (201):
 ### 7.2 Generate Lessons from PDF
 
 ```
-POST /api/v1/content/generate/{document_id}
+POST /api/content/generate/{document_id}
 Authorization: Bearer <admin_token>
 
 Response (202):
@@ -526,7 +526,7 @@ Response (202):
   "estimated_completion": "2026-06-19T10:05:00Z"
 }
 
-GET /api/v1/content/generate/{document_id}/status
+GET /api/content/generate/{document_id}/status
 
 Response (200):
 {
@@ -540,7 +540,7 @@ Response (200):
 ### 7.3 Get Content Feed (Student)
 
 ```
-GET /api/v1/content/lessons?subject=mathematics&grade=3&language=hi
+GET /api/content/lessons?subject=mathematics&grade=3&language=hi
 Authorization: Bearer <student_token>
 
 Response (200):
@@ -573,7 +573,7 @@ Response (200):
 ### 7.4 Tutor Content Review
 
 ```
-GET /api/v1/content/review?status=pending&tutor_id={tutor_id}
+GET /api/content/review?status=pending&tutor_id={tutor_id}
 Authorization: Bearer <tutor_token>
 
 Response (200):
@@ -589,7 +589,7 @@ Response (200):
   ]
 }
 
-POST /api/v1/content/review/{lesson_id}
+POST /api/content/review/{lesson_id}
 Authorization: Bearer <tutor_token>
 
 Request:
@@ -616,7 +616,7 @@ Response (200):
 ### 8.1 Generate Assessment
 
 ```
-POST /api/v1/assessments/generate
+POST /api/assessments/generate
 Authorization: Bearer <student_or_tutor_token>
 
 Request:
@@ -656,7 +656,7 @@ Response (201):
 ### 8.2 Submit Subjective Answer (Image Upload)
 
 ```
-POST /api/v1/assessments/{assessment_id}/questions/{question_number}/submit
+POST /api/assessments/{assessment_id}/questions/{question_number}/submit
 Authorization: Bearer <student_token>
 Content-Type: multipart/form-data
 
@@ -675,7 +675,7 @@ Response (200):
 ### 8.3 Get Assessment Results
 
 ```
-GET /api/v1/assessments/{assessment_id}/results
+GET /api/assessments/{assessment_id}/results
 Authorization: Bearer <student_or_tutor_token>
 
 Response (200):
@@ -718,7 +718,7 @@ Response (200):
 ### 9.1 Speech-to-Text (STT)
 
 ```
-POST /api/v1/voice/stt
+POST /api/voice/stt
 Authorization: Bearer <token>
 Content-Type: multipart/form-data
 
@@ -738,7 +738,7 @@ Response (200):
 ### 9.2 Text-to-Speech (TTS)
 
 ```
-POST /api/v1/voice/tts
+POST /api/voice/tts
 Authorization: Bearer <token>
 
 Request:
@@ -759,7 +759,7 @@ Response (200): audio/mpeg binary
 ### 10.1 Student Analytics
 
 ```
-GET /api/v1/analytics/student/{student_id}?period=30d
+GET /api/analytics/student/{student_id}?period=30d
 Authorization: Bearer <student_or_tutor_or_principal_token>
 
 Response (200):
@@ -788,7 +788,7 @@ Response (200):
 ### 10.2 Platform Analytics
 
 ```
-GET /api/v1/analytics/platform?period=30d
+GET /api/analytics/platform?period=30d
 Authorization: Bearer <admin_token>
 
 Response (200):
@@ -807,7 +807,7 @@ Response (200):
 ### 11.1 Get Notifications
 
 ```
-GET /api/v1/notifications?unread_only=true
+GET /api/notifications?unread_only=true
 Authorization: Bearer <token>
 
 Response (200):
@@ -825,7 +825,7 @@ Response (200):
   ]
 }
 
-POST /api/v1/notifications/{notification_id}/read
+POST /api/notifications/{notification_id}/read
 Response (204): No Content
 ```
 
@@ -836,7 +836,7 @@ Response (204): No Content
 ### 12.1 Health Check
 
 ```
-GET /api/v1/health
+GET /api/health
 
 Response (200):
 {
@@ -921,7 +921,7 @@ Connect: wss://api.vidyamitra.com/ws/sessions/{session_id}?token=***
 ### 16.1 Notifications
 
 ```
-GET /api/v1/notifications?unread_only=true&role=tutor
+GET /api/notifications?unread_only=true&role=tutor
 Authorization: Bearer <token>
 
 Response (200):
@@ -942,10 +942,10 @@ Response (200):
   "unread_count": 5
 }
 
-POST /api/v1/notifications/{id}/read
+POST /api/notifications/{id}/read
 Response (204): No Content
 
-POST /api/v1/notifications/{id}/action
+POST /api/notifications/{id}/action
 Request: { "action": "approved" }
 Response (200): { "status": "processed" }
 ```
@@ -953,7 +953,7 @@ Response (200): { "status": "processed" }
 ### 16.2 Student Feedback on Tutors
 
 ```
-POST /api/v1/feedback/tutor
+POST /api/feedback/tutor
 Authorization: Bearer <student_token>
 
 Request:
@@ -967,7 +967,7 @@ Request:
 
 Response (201): { "id": "uuid", "status": "submitted" }
 
-GET /api/v1/tutors/{tutor_id}/feedback
+GET /api/tutors/{tutor_id}/feedback
 Authorization: Bearer <principal_or_tutor_token>
 
 Response (200):
@@ -985,7 +985,7 @@ Response (200):
 ### 16.3 Tutor Reports to Students
 
 ```
-POST /api/v1/reports/tutor
+POST /api/reports/tutor
 Authorization: Bearer <tutor_token>
 
 Request:
@@ -1004,7 +1004,7 @@ Request:
 
 Response (201): { "id": "uuid", "status": "sent" }
 
-GET /api/v1/students/{student_id}/tutor-reports
+GET /api/students/{student_id}/tutor-reports
 Authorization: Bearer <student_token>
 
 Response (200):
@@ -1028,7 +1028,7 @@ Response (200):
 ### 16.4 Tutor Analytics per Student
 
 ```
-GET /api/v1/tutors/{tutor_id}/students/{student_id}/analytics
+GET /api/tutors/{tutor_id}/students/{student_id}/analytics
 Authorization: Bearer <tutor_token>
 
 Response (200):
@@ -1057,7 +1057,7 @@ Response (200):
 ### 16.5 Intelligent Tutor Matching
 
 ```
-POST /api/v1/matching/assign
+POST /api/matching/assign
 Authorization: Bearer <admin_token>
 
 Request:
@@ -1086,7 +1086,7 @@ Response (200):
   "alternatives": [...]
 }
 
-POST /api/v1/tutors/{tutor_id}/reassign
+POST /api/tutors/{tutor_id}/reassign
 Authorization: Bearer <tutor_token>
 
 Request:
@@ -1104,7 +1104,7 @@ Response (200): {
 ### 16.6 Principal Institution-Wide Endpoints
 
 ```
-GET /api/v1/principal/dashboard
+GET /api/principal/dashboard
 Authorization: Bearer <principal_token>
 
 Response (200):
