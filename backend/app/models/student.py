@@ -23,6 +23,10 @@ class Student(Base):
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"),
         nullable=True, index=True
     )
+    tutor_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("tutors.id", ondelete="SET NULL"),
+        nullable=True, index=True
+    )
 
     # Basic Profile
     age: Mapped[int] = mapped_column(Integer, nullable=False)

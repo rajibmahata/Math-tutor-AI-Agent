@@ -142,8 +142,7 @@ class AgentOrchestrator:
             # Wrong: explain why + show step-by-step solution
             solution = await self.generate_solution(ctx)
             ctx.response = assessment.get("feedback", "Let me explain.") + "\n\n" + solution
-        
-        ctx.response = assessment.get("feedback", motivation)
+
         return ctx
 
     async def _run_progress_flow(self, ctx: AgentContext) -> AgentContext:

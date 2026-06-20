@@ -95,6 +95,8 @@ def _register_routers(app: FastAPI):
         ("app.api.v1.achievements", "/api/v1/achievements", ["achievements"]),
         ("app.api.v1.tutors", "/api/v1/tutors", ["tutors"]),
         ("app.api.v1.admin", "/api/v1/admin", ["admin"]),
+        ("app.api.v1.content", "/api/v1/content", ["content"]),
+        ("app.api.v1.notifications", "/api/v1/notifications", ["notifications"]),
     ]
 
     import importlib
