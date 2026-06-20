@@ -1,6 +1,6 @@
-# Implementation Roadmap — VidyaMitra v2.0
+# Implementation Roadmap — AI Student Tutor Platform v2.1 (Revised)
 
-> **Date:** 2026-06-19 | **Version:** 2.0
+> **Date:** 2026-06-20 | **Version:** 2.1
 
 ---
 
@@ -66,7 +66,22 @@
 | Tutor feedback on assessments | 4h |
 | Assessment results UI with AI + tutor feedback | 6h |
 
-### Sprint 2.5: Admin + Governance (Week 9-10)
+### Sprint 2.5: Notifications, Feedback & Reports (Week 9-10)
+
+| Task | Est. |
+|------|------|
+| notification_types seed data (16 types) | 2h |
+| Notification dispatch agent + API | 4h |
+| Tutor Notification Center UI | 4h |
+| Principal Notification & Approval Center UI | 4h |
+| Admin Notification Center UI | 3h |
+| Student feedback on tutors API + UI | 4h |
+| Tutor reports to students API + UI | 4h |
+| Feedback aggregation + rollup to Principal | 3h |
+| Low feedback alert automation | 2h |
+| Tutor analytics per student (interests, time, patterns, retention) | 6h |
+
+### Sprint 2.6: Admin + Governance (Week 11-12)
 
 | Task | Est. |
 |------|------|

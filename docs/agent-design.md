@@ -1,6 +1,6 @@
-# AI Agent Design — VidyaMitra v2.0 (12 Agents)
+# AI Agent Design — AI Student Tutor Platform v2.1 (Revised)
 
-> **Date:** 2026-06-19 | **Version:** 2.0 | **Framework:** LangGraph
+> **Date:** 2026-06-20 | **Version:** 2.1 | **Framework:** LangGraph
 
 ---
 
@@ -141,6 +141,28 @@
 ---
 
 ## 4. Guardrails & Safety (Expanded)
+
+## 5. v2.1 New Agent Capabilities
+
+### 5.1 Feedback Analytics Agent
+- **Purpose:** Process student feedback on tutors, compute aggregate ratings
+- **Input:** Student ratings + feedback text per tutor
+- **Process:** Aggregate scores, detect sentiment, flag low-rated tutors
+- **Output:** FeedbackSummary for Tutor/Principal dashboards
+- **Trigger:** On new feedback submission, nightly rollup
+
+### 5.2 Report Generation Agent (Enhanced)
+- **Purpose:** Generate Tutor Reports to Students with AI-written summaries
+- **Input:** Student performance data, learning patterns, knowledge retention
+- **Process:** AI writes performance summary, identifies strengths/weak areas, generates recommended study plan
+- **Output:** Structured TutorReport visible on Student Dashboard
+
+### 5.3 Notification Dispatch Agent
+- **Purpose:** Route notifications to correct role dashboard
+- **Triggers:** Content pending (→Tutor), Tutor approval (→Principal), Final approval (→Admin), Feedback alert (→Principal), Report ready (→Student)
+- **Output:** Notification with action_url linking to relevant screen
+
+## 6. Guardrails & Safety (Expanded)
 
 - **Content Accuracy:** All AI-generated lessons must pass tutor validation
 - **Age-Appropriate:** No violent, scary, or inappropriate examples

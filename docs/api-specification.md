@@ -1,7 +1,6 @@
-# API Specification — VidyaMitra AI Student Tutor Platform v2.0
+# API Specification — AI Student Tutor Platform v2.1 (Revised)
 
-> **Date:** 2026-06-19 | **Version:** 2.0  
-> **Base URL:** `/api/v1` | **Protocol:** REST + WebSocket | **Format:** JSON
+> **Date:** 2026-06-20 | **Version:** 2.1 | **Base URL:** `/api/v1`
 
 ---
 
@@ -916,5 +915,224 @@ Connect: wss://api.vidyamitra.com/ws/sessions/{session_id}?token=***
 | LLM calls (all) | 30 req/min | Per user |
 
 ---
+
+## 16. v2.1 New Endpoints — Notifications, Feedback, Reports
+
+### 16.1 Notifications
+
+```
+GET /api/v1/notifications?unread_only=true&role=tutor
+Authorization: Bearer <token>
+
+Response (200):
+{
+  "data": [
+    {
+      "id": "uuid",
+      "type": "content_pending",
+      "title": "Lesson Review Required",
+      "message": "'Introduction to Fractions' needs your review",
+      "priority": "high",
+      "is_read": false,
+      "action_url": "/tutor/reviews/lesson-452",
+      "action_data": {"lesson_id": "uuid"},
+      "created_at": "2026-06-20T10:00:00Z"
+    }
+  ],
+  "unread_count": 5
+}
+
+POST /api/v1/notifications/{id}/read
+Response (204): No Content
+
+POST /api/v1/notifications/{id}/action
+Request: { "action": "approved" }
+Response (200): { "status": "processed" }
+```
+
+### 16.2 Student Feedback on Tutors
+
+```
+POST /api/v1/feedback/tutor
+Authorization: Bearer <student_token>
+
+Request:
+{
+  "tutor_id": "uuid",
+  "rating": 5,
+  "feedback_text": "Mrs. Gupta explains concepts very clearly!",
+  "categories": ["helpful", "knowledgeable", "patient"],
+  "is_anonymous": false
+}
+
+Response (201): { "id": "uuid", "status": "submitted" }
+
+GET /api/v1/tutors/{tutor_id}/feedback
+Authorization: Bearer <principal_or_tutor_token>
+
+Response (200):
+{
+  "tutor_id": "uuid",
+  "avg_rating": 4.7,
+  "total_feedback": 42,
+  "category_breakdown": { "helpful": 38, "knowledgeable": 35, "patient": 30 },
+  "recent_feedback": [
+    { "rating": 5, "text": "Very helpful!", "student_name": "Riya", "date": "2026-06-19" }
+  ]
+}
+```
+
+### 16.3 Tutor Reports to Students
+
+```
+POST /api/v1/reports/tutor
+Authorization: Bearer <tutor_token>
+
+Request:
+{
+  "student_id": "uuid",
+  "period_start": "2026-06-01",
+  "period_end": "2026-06-20",
+  "performance_summary": "Riya has made excellent progress in multiplication...",
+  "strengths": ["Addition", "Multiplication tables 1-5"],
+  "weak_areas": ["Division concepts"],
+  "study_plan": [
+    { "action": "Practice division 15 min/day", "topic": "Division", "frequency": "daily" }
+  ],
+  "recommendations": "Focus on word problems to build confidence"
+}
+
+Response (201): { "id": "uuid", "status": "sent" }
+
+GET /api/v1/students/{student_id}/tutor-reports
+Authorization: Bearer <student_token>
+
+Response (200):
+{
+  "reports": [
+    {
+      "id": "uuid",
+      "tutor_name": "Mrs. Gupta",
+      "period": "Jun 1 - Jun 20, 2026",
+      "performance_summary": "...",
+      "strengths": [...],
+      "weak_areas": [...],
+      "study_plan": [...],
+      "is_read": false,
+      "created_at": "2026-06-20T10:00:00Z"
+    }
+  ]
+}
+```
+
+### 16.4 Tutor Analytics per Student
+
+```
+GET /api/v1/tutors/{tutor_id}/students/{student_id}/analytics
+Authorization: Bearer <tutor_token>
+
+Response (200):
+{
+  "student_id": "uuid",
+  "student_name": "Riya",
+  "interest_areas": ["Multiplication", "Geometry"],
+  "time_spent": {
+    "total_minutes": 1240,
+    "by_subject": { "Mathematics": 980, "Science": 260 },
+    "weekly_trend": [180, 210, 195, 240]
+  },
+  "learning_patterns": {
+    "preferred_time": "evening",
+    "sessions_per_week": 5,
+    "avg_session_minutes": 18
+  },
+  "knowledge_retention": {
+    "week_1": 0.88,
+    "week_4": 0.76,
+    "trend": "slight_decay"
+  }
+}
+```
+
+### 16.5 Intelligent Tutor Matching
+
+```
+POST /api/v1/matching/assign
+Authorization: Bearer <admin_token>
+
+Request:
+{
+  "student_id": "uuid",
+  "criteria": {
+    "subject": "Mathematics",
+    "language": "hi",
+    "region": "kolkata"
+  }
+}
+
+Response (200):
+{
+  "matched_tutor": {
+    "id": "uuid",
+    "name": "Mrs. Gupta",
+    "match_score": 0.92,
+    "match_details": {
+      "academic": 0.95,
+      "language": 0.90,
+      "regional": 0.95,
+      "cultural": 0.88
+    }
+  },
+  "alternatives": [...]
+}
+
+POST /api/v1/tutors/{tutor_id}/reassign
+Authorization: Bearer <tutor_token>
+
+Request:
+{
+  "student_id": "uuid",
+  "reason": "Student requires Hindi-medium, I teach English"
+}
+
+Response (200): {
+  "status": "pending_principal_approval",
+  "workflow_id": "uuid"
+}
+```
+
+### 16.6 Principal Institution-Wide Endpoints
+
+```
+GET /api/v1/principal/dashboard
+Authorization: Bearer <principal_token>
+
+Response (200):
+{
+  "institution": "DAV Group",
+  "students": {
+    "total": 450,
+    "active": 380,
+    "by_grade": { "3": 60, "4": 55, "5": 50 }
+  },
+  "tutors": {
+    "total": 12,
+    "active": 10,
+    "performance": [
+      { "name": "Mrs. Gupta", "rating": 4.7, "students": 24, "approval_rate": 0.92 },
+      { "name": "Mr. Kumar", "rating": 4.2, "students": 18, "approval_rate": 0.78 }
+    ]
+  },
+  "pending_approvals": {
+    "tutor_registrations": 2,
+    "reassignment_requests": 1,
+    "escalations": 1
+  },
+  "student_feedback_summary": {
+    "avg_platform_rating": 4.3,
+    "low_rated_tutors": []
+  }
+}
+```
 
 ## Next: Implementation → [implementation-roadmap.md](./implementation-roadmap.md)

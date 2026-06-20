@@ -1,250 +1,129 @@
-# Database Schema — VidyaMitra v2.0
+# Database Schema Additions — v2.1 (Revised)
 
-> **Date:** 2026-06-19 | **Version:** 2.0 | **Database:** PostgreSQL 16
+> **Date:** 2026-06-20 | **Version:** 2.1
 
 ---
 
-## 1. New Tables (v2.0)
+## 1. New Tables (v2.1)
 
-### 1.1 tutors
+### 1.1 tutor_reports
 ```sql
-CREATE TABLE tutors (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id         UUID UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    subjects        JSONB NOT NULL DEFAULT '[]',        -- [{subject, grade_start, grade_end}]
-    experience_yrs  INTEGER NOT NULL DEFAULT 0,
-    bio             TEXT,
-    verification_status VARCHAR(20) DEFAULT 'pending',  -- pending|verified|rejected
-    verified_by     UUID REFERENCES users(id),
-    verified_at     TIMESTAMPTZ,
-    is_active       BOOLEAN DEFAULT FALSE,
-    rating          REAL DEFAULT 0.0,
-    total_students  INTEGER DEFAULT 0,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-```
-
-### 1.2 tutor_documents
-```sql
-CREATE TABLE tutor_documents (
+CREATE TABLE tutor_reports (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tutor_id        UUID NOT NULL REFERENCES tutors(id) ON DELETE CASCADE,
-    doc_type        VARCHAR(50) NOT NULL,               -- degree|certificate|id_proof|experience
-    file_url        VARCHAR(500) NOT NULL,
-    ocr_text        TEXT,
-    ai_verified     BOOLEAN DEFAULT FALSE,
-    ai_confidence   REAL DEFAULT 0.0,
-    ai_notes        TEXT,
-    uploaded_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-```
-
-### 1.3 principals
-```sql
-CREATE TABLE principals (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id         UUID UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    institution     VARCHAR(255),
-    jurisdiction    JSONB DEFAULT '{}',                  -- {grades, subjects, regions}
-    is_active       BOOLEAN DEFAULT TRUE,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-```
-
-### 1.4 curriculum_nodes
-```sql
-CREATE TABLE curriculum_nodes (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    parent_id       UUID REFERENCES curriculum_nodes(id),
-    node_type       VARCHAR(20) NOT NULL,               -- subject|chapter|topic
-    name_en         VARCHAR(255) NOT NULL,
-    name_hi         VARCHAR(255),
-    name_bn         VARCHAR(255),
-    name_ta         VARCHAR(255),
-    grade_start     VARCHAR(5) NOT NULL,
-    grade_end       VARCHAR(5),
-    board           VARCHAR(50) DEFAULT 'ncert',
-    sort_order      INTEGER DEFAULT 0,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-```
-
-### 1.5 content_lessons
-```sql
-CREATE TABLE content_lessons (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    curriculum_node_id UUID REFERENCES curriculum_nodes(id),
-    title           VARCHAR(500) NOT NULL,
-    content_text    TEXT,
-    content_json    JSONB,                               -- Structured lesson data
-    language        VARCHAR(5) NOT NULL DEFAULT 'en',
-    region          VARCHAR(50),                         -- kolkata|chennai|delhi|rural
-    culture_context VARCHAR(50),
-    video_url       VARCHAR(500),
-    audio_url       VARCHAR(500),
-    source_pdf_id   UUID,                                -- Original PDF reference
-    status          VARCHAR(20) DEFAULT 'draft',         -- draft|review|published|rejected
-    created_by      VARCHAR(20) DEFAULT 'ai',            -- ai|tutor_id
-    reviewed_by     UUID REFERENCES tutors(id),
-    reviewed_at     TIMESTAMPTZ,
-    published_at    TIMESTAMPTZ,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-```
-
-### 1.6 content_reviews
-```sql
-CREATE TABLE content_reviews (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    lesson_id       UUID NOT NULL REFERENCES content_lessons(id) ON DELETE CASCADE,
-    tutor_id        UUID NOT NULL REFERENCES tutors(id),
-    action          VARCHAR(20) NOT NULL,                -- approved|rejected|modified
-    feedback        TEXT,
-    accuracy_score  REAL,                                -- 0-1
-    completeness_score REAL,
-    alignment_score REAL,
-    reviewed_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-```
-
-### 1.7 approval_workflows
-```sql
-CREATE TABLE approval_workflows (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    workflow_type   VARCHAR(30) NOT NULL,                -- tutor_approval|content_approval|escalation
-    target_id       UUID NOT NULL,                       -- tutor_id or lesson_id
-    current_step    VARCHAR(30) NOT NULL,                -- ai_verification|principal_review|admin_approval
-    status          VARCHAR(20) DEFAULT 'pending',       -- pending|approved|rejected
-    steps_history   JSONB DEFAULT '[]',                  -- [{step, actor_id, action, timestamp}]
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    completed_at    TIMESTAMPTZ
-);
-```
-
-### 1.8 notifications
-```sql
-CREATE TABLE notifications (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    type            VARCHAR(30) NOT NULL,                -- tutor_request|content_alert|escalation|system
-    title           VARCHAR(255) NOT NULL,
-    message         TEXT,
+    student_id      UUID NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    report_type     VARCHAR(20) DEFAULT 'periodic',     -- periodic|milestone|final
+    period_start    DATE,
+    period_end      DATE,
+    performance_summary TEXT,
+    strengths       JSONB DEFAULT '[]',
+    weak_areas      JSONB DEFAULT '[]',
+    study_plan      JSONB DEFAULT '[]',                 -- [{action, topic, frequency}]
+    recommendations TEXT,
     is_read         BOOLEAN DEFAULT FALSE,
-    action_url      VARCHAR(500),
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE INDEX idx_tutor_reports_student ON tutor_reports(student_id);
+CREATE INDEX idx_tutor_reports_tutor ON tutor_reports(tutor_id);
 ```
 
-### 1.9 source_documents (PDF uploads)
+### 1.2 student_feedback_on_tutors
 ```sql
-CREATE TABLE source_documents (
+CREATE TABLE student_feedback_on_tutors (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    title           VARCHAR(500) NOT NULL,
-    file_url        VARCHAR(500) NOT NULL,
-    file_type       VARCHAR(20) DEFAULT 'pdf',
-    uploaded_by     UUID NOT NULL REFERENCES users(id),
-    subject         VARCHAR(100),
-    grade           VARCHAR(5),
-    language        VARCHAR(5),
-    extraction_status VARCHAR(20) DEFAULT 'pending',    -- pending|processing|completed|failed
-    extracted_text  TEXT,
-    chunk_count     INTEGER DEFAULT 0,
-    embedding_model VARCHAR(50) DEFAULT 'text-embedding-3-small',
-    uploaded_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    student_id      UUID NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    tutor_id        UUID NOT NULL REFERENCES tutors(id) ON DELETE CASCADE,
+    rating          INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    feedback_text   TEXT,
+    categories      JSONB DEFAULT '[]',                 -- ['helpful','knowledgeable','patient']
+    is_anonymous    BOOLEAN DEFAULT FALSE,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(student_id, tutor_id, created_at)            -- One feedback per period
+);
+
+CREATE INDEX idx_student_feedback_tutor ON student_feedback_on_tutors(tutor_id);
+```
+
+### 1.3 notification_types (Seed Data)
+```sql
+CREATE TABLE notification_types (
+    type            VARCHAR(30) PRIMARY KEY,
+    category        VARCHAR(20) NOT NULL,               -- action_required|info|alert
+    target_role     VARCHAR(20) NOT NULL,               -- tutor|principal|admin|student
+    description     TEXT,
+    action_url_template VARCHAR(500)
 );
 ```
 
----
-
-## 2. Modified Tables (v1.0 → v2.0)
-
-### 2.1 users — Add role expansion
+### 1.4 notifications (Enhanced)
 ```sql
-ALTER TABLE users ADD COLUMN phone VARCHAR(20);
-ALTER TABLE users ADD COLUMN country VARCHAR(50);
-ALTER TABLE users ADD COLUMN state VARCHAR(50);
-ALTER TABLE users ADD COLUMN district VARCHAR(50);
-ALTER TABLE users ADD COLUMN address TEXT;
--- Role: 'student' | 'tutor' | 'principal' | 'admin'
-```
-
-### 2.2 students — Add learning preferences
-```sql
-ALTER TABLE students ADD COLUMN gender VARCHAR(10);
-ALTER TABLE students ADD COLUMN school VARCHAR(255);
-ALTER TABLE students ADD COLUMN country VARCHAR(50);
-ALTER TABLE students ADD COLUMN state VARCHAR(50);
-ALTER TABLE students ADD COLUMN district VARCHAR(50);
-ALTER TABLE students ADD COLUMN address TEXT;
-ALTER TABLE students ADD COLUMN learning_style VARCHAR(30);    -- visual|auditory|reading|kinesthetic
-ALTER TABLE students ADD COLUMN interests JSONB DEFAULT '[]'; -- ['sports','music','animals']
-ALTER TABLE students ADD COLUMN matched_tutor_id UUID REFERENCES tutors(id);
-```
-
-### 2.3 assessments — Add subjective support
-```sql
-ALTER TABLE assessments ADD COLUMN assessment_type VARCHAR(20) DEFAULT 'objective'; -- objective|subjective|mixed
-ALTER TABLE assessments ADD COLUMN image_url VARCHAR(500);      -- Uploaded handwritten answer
-ALTER TABLE assessments ADD COLUMN ocr_text TEXT;               -- Extracted text from image
-ALTER TABLE assessments ADD COLUMN diagram_analysis JSONB;      -- AI diagram evaluation
-ALTER TABLE assessments ADD COLUMN tutor_feedback TEXT;         -- Tutor's additional feedback
-ALTER TABLE assessments ADD COLUMN tutor_id UUID REFERENCES tutors(id);
-ALTER TABLE assessments ADD COLUMN ai_feedback TEXT;            -- AI-generated feedback
+-- Add to existing notifications table:
+ALTER TABLE notifications ADD COLUMN notification_type VARCHAR(30) REFERENCES notification_types(type);
+ALTER TABLE notifications ADD COLUMN action_data JSONB;      -- Context for action URL
+ALTER TABLE notifications ADD COLUMN expires_at TIMESTAMPTZ;
+ALTER TABLE notifications ADD COLUMN priority VARCHAR(10) DEFAULT 'normal';  -- low|normal|high|urgent
 ```
 
 ---
 
-## 3. Entity Relationships (v2.0)
+## 2. Modified Tables (v2.1)
 
+### 2.1 tutors — Add audit fields
+```sql
+ALTER TABLE tutors ADD COLUMN content_approval_count INTEGER DEFAULT 0;
+ALTER TABLE tutors ADD COLUMN content_rejection_count INTEGER DEFAULT 0;
+ALTER TABLE tutors ADD COLUMN avg_feedback_rating REAL DEFAULT 0.0;
+ALTER TABLE tutors ADD COLUMN last_report_generated_at TIMESTAMPTZ;
 ```
-users (1) ────< students
-users (1) ────< tutors
-users (1) ────< principals
-tutors (1) ──< content_reviews
-tutors (1) ──< content_lessons (reviewed_by)
-curriculum_nodes (1) ──< content_lessons
-source_documents (1) ──< content_lessons (source_pdf_id)
-content_lessons (1) ──< content_reviews
-approval_workflows → tutors | content_lessons (polymorphic)
-students (1) ──< assessments
-tutors (1) ──< assessments (tutor feedback)
+
+### 2.2 principals — Add oversight metrics
+```sql
+ALTER TABLE principals ADD COLUMN total_students_overseen INTEGER DEFAULT 0;
+ALTER TABLE principals ADD COLUMN total_tutors_overseen INTEGER DEFAULT 0;
+ALTER TABLE principals ADD COLUMN escalations_resolved INTEGER DEFAULT 0;
+ALTER TABLE principals ADD COLUMN avg_response_time_hours REAL DEFAULT 0;
 ```
 
 ---
 
-## 4. Pydantic Schemas (Key v2.0 Additions)
+## 3. Pydantic Schemas (v2.1 Additions)
 
 ```python
-class TutorRegistrationRequest(BaseModel):
-    user_id: UUID
-    subjects: list[SubjectInfo]        # [{name, grade_start, grade_end}]
-    experience_yrs: int
-    bio: str | None
-    documents: list[DocumentUpload]    # [{type, file}]
+class TutorReportRequest(BaseModel):
+    student_id: UUID
+    period_start: date | None
+    period_end: date | None
+    performance_summary: str
+    strengths: list[str]
+    weak_areas: list[str]
+    study_plan: list[StudyPlanItem]
+    recommendations: str | None
 
-class ContentLessonResponse(BaseModel):
+class StudentFeedbackRequest(BaseModel):
+    tutor_id: UUID
+    rating: int = Field(ge=1, le=5)
+    feedback_text: str | None
+    categories: list[str] = []
+    is_anonymous: bool = False
+
+class NotificationResponse(BaseModel):
     id: UUID
+    type: str
     title: str
-    content_text: str | None
-    language: str
-    region: str | None
-    video_url: str | None
-    audio_url: str | None
-    status: str
-    personalization: PersonalizationMeta | None
+    message: str | None
+    priority: str
+    is_read: bool
+    action_url: str | None
+    created_at: datetime
 
-class AssessmentSubmission(BaseModel):
-    assessment_id: UUID
-    answers: list[Answer]              # [{question_id, answer_text, image_url}]
-
-class ApprovalWorkflowResponse(BaseModel):
-    id: UUID
-    workflow_type: str
-    current_step: str
-    status: str
-    steps_history: list[WorkflowStep]
+class TutorDashboardResponse(BaseModel):
+    assigned_students: list[StudentSummary]
+    pending_actions: list[NotificationResponse]
+    analytics: TutorAnalytics
+    feedback_summary: FeedbackSummary
 ```
 
 ---
 
-## Next: Implementation Roadmap → [implementation-roadmap.md](./implementation-roadmap.md)
+## Next: API Specification → [api-specification.md](./api-specification.md)

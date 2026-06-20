@@ -1,4 +1,4 @@
-# Architecture Diagrams — VidyaMitra v2.0
+# Architecture Diagrams — AI Student Tutor Platform v2.1 (Revised)
 
 > **Date:** 2026-06-19 | **Version:** 2.0 | **Format:** Mermaid (renders on GitHub)
 
@@ -430,3 +430,50 @@ stateDiagram-v2
 ---
 
 *Diagrams render natively on GitHub when viewing the markdown file.*
+
+---
+
+## 10. Notification & Feedback Flow (v2.1)
+
+```mermaid
+flowchart TD
+    subgraph Triggers["TRIGGERS"]
+        AI_Content["AI Content Generated"]
+        Student_Answer["Subjective Answer Submitted"]
+        Student_FB["Student Submits Tutor Feedback"]
+        Tutor_Report["Tutor Creates Student Report"]
+        Reassign_Req["Tutor Requests Reassignment"]
+    end
+
+    subgraph Notifications["NOTIFICATION CENTERS"]
+        Tutor_NC["👨‍🏫 Tutor Notification Center<br/>• Content pending<br/>• Answers to evaluate<br/>• Reassignment updates"]
+        Principal_NC["👨‍💼 Principal Notification Center<br/>• Tutor approvals<br/>• Reassignment requests<br/>• Low feedback alerts<br/>• Escalations"]
+        Admin_NC["⚡ Admin Notification Center<br/>• Final tutor approvals<br/>• Platform alerts<br/>• Compliance exceptions"]
+        Student_NC["👩‍🎓 Student<br/>• Tutor report ready<br/>• Assessment results"]
+    end
+
+    AI_Content --> Tutor_NC
+    Student_Answer --> Tutor_NC
+    Reassign_Req --> Tutor_NC
+    Reassign_Req --> Principal_NC
+    Student_FB --> Principal_NC
+    Student_FB --> Admin_NC
+    Tutor_Report --> Student_NC
+    
+    Tutor_NC --> Action["Action Taken<br/>(Approve/Reject/Escalate)"]
+    Principal_NC --> Action
+    Admin_NC --> Action
+```
+
+## 11. Student Feedback → Principal Oversight Flow (v2.1)
+
+```mermaid
+flowchart LR
+    Student["👩‍🎓 Student"] -->|Rating + Feedback| System["Feedback System"]
+    System --> Tutor_DB[("Tutor Feedback DB")]
+    Tutor_DB --> Agg["AI Aggregation"]
+    Agg --> Tutor_View["Tutor: Personal Rating"]
+    Agg --> Principal_View["Principal: All Tutors' Ratings"]
+    Agg --> Admin_View["Admin: Platform-Wide"]
+    Agg -->|Rating < 3.0| Alert["⚠️ Low Feedback Alert → Principal NC"]
+```

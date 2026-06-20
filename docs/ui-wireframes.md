@@ -1,6 +1,6 @@
-# UI/UX Design — VidyaMitra v2.0 (Multi-Role Platform)
+# UI/UX Design — AI Student Tutor Platform v2.1 (Revised)
 
-> **Date:** 2026-06-19 | **Version:** 2.0  
+> **Date:** 2026-06-20 | **Version:** 2.1  
 > **Framework:** Next.js + Tailwind CSS | **Design System:** Role-aware, accessible
 
 ---

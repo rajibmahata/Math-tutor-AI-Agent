@@ -1,220 +1,187 @@
-# Product Requirements Document (PRD) — AI Student Tutor Platform
+# Product Requirements Document (PRD) — AI Student Tutor Platform v2.1
 
-> **Date:** 2026-06-19 | **Version:** 2.0 | **Status:** Updated
-> **Author:** WorkCore (RCore)
+> **Date:** 2026-06-20 | **Version:** 2.1 (Revised) | **Status:** Final
+> **Author:** WorkCore (RCore) | **Source:** Functional Specification V1
 
 ---
 
 ## 1. Product Vision
 
-**An AI-powered personalized learning platform that transforms educational content into interactive, voice-enabled, adaptive learning experiences — with human oversight at every stage.**
+**To provide every student with a personalized AI tutor that teaches in their preferred language, cultural context, and learning style — while maintaining educational quality through human oversight.**
 
-The platform serves Students, Tutors, Principals, and Super Admins in a complete educational ecosystem where AI generates and personalizes content, and human experts validate quality.
-
----
-
-## 2. Product Name
-
-**GanitMitra → VidyaMitra**
-(विद्या मित्र / বিদ্যা মিত্র — "Knowledge Friend")
+The platform unifies five participant groups — AI, Tutors, Principals, Administrators, and Students — into a single, scalable, personalized educational ecosystem. AI generates content; tutors validate it; students learn through voice-first, adaptive experiences.
 
 ---
 
-## 3. Target Users
+## 2. Platform Pillars
 
-| Role | Description | Count |
-|------|-------------|-------|
-| **Student** | Learner consuming personalized content | Primary (unlimited) |
-| **Tutor** | Subject expert validating AI content | Medium (per subject) |
-| **Principal** | Academic supervisor, quality assurance | Few (per institution) |
-| **Super Admin** | Platform governance, compliance | 1-2 per org |
-
----
-
-## 4. Core Features (MoSCoW)
-
-### 🔴 Must Have (MVP v2.0)
-
-| ID | Feature | Role |
-|----|---------|------|
-| F1 | Multi-role auth (Student/Tutor/Principal/Admin) | All |
-| F2 | Student registration with learning preferences | Student |
-| F3 | AI Student Profile (Digital Twin v2) | Student |
-| F4 | Subject → Chapter → Topic navigation | Student |
-| F5 | Personalized content delivery (text + audio + video) | Student |
-| F6 | Voice-based conversational learning | Student |
-| F7 | AI Tutor with Hint→Guide→Solve methodology | Student |
-| F8 | Assessment Engine (MCQ + Short Answer + Subjective) | Student |
-| F9 | AI answer evaluation with SymPy + handwriting OCR | Student |
-| F10 | Progress tracking dashboard with gamification | Student |
-| F11 | Tutor registration + document verification workflow | Tutor |
-| F12 | AI content generation (PDF → Lessons → Video) | Tutor/Admin |
-| F13 | Content validation pipeline (Tutor review → Publish) | Tutor |
-| F14 | Tutor dashboard (student performance, analytics) | Tutor |
-| F15 | Principal dashboard (monitor tutors, quality) | Principal |
-| F16 | Super Admin dashboard (org-wide analytics) | Admin |
-| F17 | AI Analytics Engine (learning patterns, trends) | All |
-
-### 🟡 Should Have (V2.1)
-
-| ID | Feature |
-|----|---------|
-| F18 | AI Video Generation (animated concept explanations) |
-| F19 | Intelligent Tutor Matching (subject + language + region) |
-| F20 | Tutor reassignment workflow |
-| F21 | Parent dashboard |
-| F22 | Multi-language content personalization |
-| F23 | Regional/cultural content adaptation |
-| F24 | Learning marketplace |
-
-### 🟢 Could Have (V2.2)
-
-| ID | Feature |
-|----|---------|
-| F25 | Live AI Avatar Tutor |
-| F26 | Real-time classroom |
-| F27 | Multi-school support |
-| F28 | Career guidance AI |
-| F29 | Emotional learning analytics |
-| F30 | Offline mobile learning (PWA) |
+| Pillar | Description |
+|--------|-------------|
+| **Personalization** | Content adapts dynamically to language, region, culture, grade, and learning behavior |
+| **Voice-First Learning** | Students learn through natural spoken conversation — not static text or robotic prompts |
+| **Human-in-the-Loop** | Every AI-generated lesson, video, and assessment is reviewed and approved by a qualified tutor |
+| **Multi-Role Ecosystem** | Students, Tutors, Principals, and Super Admins each get purpose-built dashboards |
+| **End-to-End Automation** | PDF → lessons → videos → tests → analytics — fully automated pipelines |
 
 ---
 
-## 5. User Journeys
-
-### 5.1 Student Learning Journey
+## 3. User Roles & Governance
 
 ```
-1. Register → Profile (age, grade, language, interests)
-2. AI creates learning profile (Digital Twin v2)
-3. Select Subject → Chapter → Topic
-4. AI delivers personalized content (text/audio/video)
-5. Voice-based Q&A with AI Tutor
-6. Complete exercises + practice
-7. Take Mock Test (MCQ + Short Answer + Subjective)
-8. AI identifies weak areas → personalized revision
-9. Take Final Assessment
-10. View progress dashboard (scores, badges, streaks)
+Super Admin → Principal → Tutor → Student
+                    AI operates across every layer
 ```
 
-### 5.2 Tutor Workflow
-
-```
-1. Register → Upload qualifications
-2. AI Verification Agent checks documents
-3. Principal reviews → Super Admin approves
-4. Access Tutor Dashboard
-5. Review AI-generated content → Approve/Modify/Reject
-6. Monitor student progress
-7. Provide personalized feedback
-```
-
-### 5.3 Content Creation Pipeline
-
-```
-Admin uploads PDF/notes
-  → AI extracts content + creates embeddings
-  → AI generates: lesson plans, summaries, explanations
-  → AI generates: videos, voice narration, examples
-  → Tutor validates (accuracy, completeness, alignment)
-  → Content published to knowledge base
-  → Students access personalized versions
-```
+| Role | Mandate | Key Functions |
+|------|---------|---------------|
+| **Student** | Consume content & learn | Learn subjects, watch videos, ask questions, complete tests, upload answers, track progress |
+| **Tutor** | Validate content & mentor | Review AI content, approve lessons, evaluate students, provide feedback, mentor |
+| **Principal** | Academic supervision | Monitor tutors, review reports, manage QA, resolve escalations |
+| **Super Admin** | Platform governance | Platform governance, principal management, tutor approvals, compliance, analytics |
 
 ---
 
-## 6. Functional Requirements
+## 4. Student Module
 
-### 6.1 Student Module
+### 4.1 Registration
+Captures: Name, Age, Gender, Class, School, Country, State, District, Address, Preferred Language, Learning Style
 
-| Requirement | Detail |
-|-------------|--------|
-| Registration | Name, age, gender, class, school, location, language preference |
-| AI Profile | Dynamic profile: learning speed, strengths, weaknesses, interests |
-| Subject nav | Browse subjects → chapters → topics |
-| Content types | Text lessons, audio, video, interactive exercises |
-| Voice learning | Ask questions verbally, receive spoken responses |
-| Assessments | MCQ, fill-in-blanks, match, short answer, subjective (image upload) |
-| Progress | Dashboard with scores, streaks, badges, recommendations |
+### 4.2 AI Student Profile
+Dynamic profile evolving over time based on: Age/Grade, Language, Region, Interests, Learning behavior
 
-### 6.2 Tutor Module
+### 4.3 Learning Journey (8 Steps)
+```
+Subject Selection → Personalized Content → Voice Learning → Chapter Learning
+→ Mock Test → Personalized Revision → Final Assessment → Progress Tracking
+```
 
-| Requirement | Detail |
-|-------------|--------|
-| Registration | Personal + professional details, qualification documents |
-| AI Verification | Auto-verify degrees, certificates, consistency |
-| Approval | Principal review → Super Admin approval workflow |
-| Content validation | Review AI-generated content, approve/modify/reject |
-| Student monitoring | View progress, scores, weak areas per student |
-| Feedback | Personalized feedback, study plans, recommendations |
-
-### 6.3 Principal Module
-
-| Requirement | Detail |
-|-------------|--------|
-| Dashboard | Student + tutor data, platform analytics |
-| Tutor monitoring | Performance, activity, content reviews |
-| Quality assurance | Approve escalations, ensure standards |
-| Content governance | Review published content quality |
-
-### 6.4 Super Admin Module
-
-| Requirement | Detail |
-|-------------|--------|
-| Organization dashboard | Platform-wide visibility |
-| User management | Manage principals, tutors, students |
-| Approval workflows | Final approval for tutors, content |
-| Analytics | Total users, engagement, outcomes |
-| Notifications | New tutor requests, content alerts, escalations |
+### 4.4 Dashboard
+Learning Metrics (progress %, streak, daily activity), Assessment Metrics (mock/final scores, subject-wise), Gamification (points, badges, achievements, rankings)
 
 ---
 
-## 7. AI Agent Architecture (v2.0 — Expanded)
+## 5. AI Content Generation Engine
 
-| # | Agent | Role |
-|---|-------|------|
-| 1 | **Teacher Agent** | Conversational voice tutoring, personalized explanations |
-| 2 | **Assessment Agent** | Evaluate answers (MCQ + text + image), scoring |
-| 3 | **Curriculum Agent** | Subject → Chapter → Topic sequencing, knowledge graph |
-| 4 | **Content Generation Agent** | PDF → lessons, summaries, videos |
-| 5 | **Content Personalization Agent** | Adapt by language, region, culture, grade |
-| 6 | **Video Generation Agent** | Auto-create animated concept explanations |
-| 7 | **Verification Agent** | Verify tutor qualifications, documents |
-| 8 | **Matching Agent** | Intelligent tutor-student matching |
-| 9 | **Analytics Agent** | Learning patterns, trends, predictions |
-| 10 | **Motivation Agent** | Encouragement, streaks, gamification |
-| 11 | **Voice Agent** | STT/TTS for all supported languages |
-| 12 | **Report Agent** | Student, tutor, principal, admin reports |
+### 5.1 Admin Upload
+PDFs, Notes, Study materials
 
-### Multi-Model AI Strategy
+### 5.2 Processing Pipeline
+```
+Extract PDF content → Create embeddings → Build knowledge base
+→ Generate lessons, summaries, explanations → Generate videos, voice narration
+```
 
-| Task | Model | Provider |
-|------|-------|----------|
-| Conversational teaching | GPT-4o / DeepSeek V4 | OpenAI / DeepSeek |
-| Content generation | GPT-4o | OpenAI |
-| Video generation | Sora / RunwayML | OpenAI / Third-party |
-| Translation & localization | GPT-4o (multilingual) | OpenAI |
-| Voice STT | Whisper | OpenAI |
-| Voice TTS | ElevenLabs / Azure / OpenAI | Multi-provider |
-| Math verification | SymPy | Local |
-| Document OCR | Tesseract / Azure Vision | Local / Azure |
-| Embeddings | text-embedding-3-small | OpenAI |
+### 5.3 Personalization (4 Dimensions)
+Language (EN/HI/BN/TA), Regional Context (Kolkata/Chennai/Delhi/Rural), Cultural Context, Grade Level
+
+### 5.4 AI Video Generation
+Topic explanations, animated concepts, visual demonstrations with local-language voice narration
 
 ---
 
-## 8. Success Metrics
+## 6. AI Tutor & Content Validation
 
-| Metric | Target (6 months) |
-|--------|-------------------|
-| Registered students | 10,000 |
-| Active tutors | 200 |
-| Content lessons published | 5,000 |
-| Student engagement (DAU) | 2,000 |
-| Tutor content approval rate | >85% |
-| Student learning velocity | +20% |
-| NPS (Student) | >50 |
-| NPS (Tutor) | >40 |
+### 6.1 AI Tutor
+Behaves like a human teacher: Conversational teaching, Voice interaction, Follow-up questioning, Motivation. Agentic: remembers context, adapts, personalizes, encourages proactively.
+
+### 6.2 Tutor Content Validation
+No AI content reaches students without review. Tutors evaluate Accuracy, Completeness, Curriculum alignment. Actions: **Approve** (publish), **Reject** (regenerate), **Modify** (edit directly).
 
 ---
 
-## Next: Architecture → [architecture.md](./architecture.md)
+## 7. Assessment Engine
+
+### 7.1 Objective
+MCQ, Fill in blanks, Match the following — auto-graded
+
+### 7.2 Subjective
+Student writes/draws on paper → uploads image → AI reads handwriting, understands diagrams, evaluates, generates score
+
+### 7.3 Teacher Review
+Tutor feedback displayed alongside AI feedback for every subjective answer
+
+---
+
+## 8. Tutor Module (Expanded)
+
+### 8.1 Registration
+Personal details, Professional details (subjects, experience), Qualification documents (degrees, certifications)
+
+### 8.2 AI Verification Agent
+Auto-checks documents, qualifications, consistency → generates verification report
+
+### 8.3 Approval Workflow
+```
+Registration → AI Verification → Principal Review → Super Admin Approval → Activated
+```
+
+### 8.4 Tutor Dashboard (Scoped to Assigned Students)
+
+| Section | Content |
+|---------|---------|
+| **Assigned Student List** | Complete roster with quick-access profiles |
+| **Activity Details** | Per-student log of lessons, videos, questions, tests |
+| **Student Performance** | Progress, scores, weak areas per student |
+| **AI Analytics per Student** | Interest areas, time spent, learning patterns, knowledge retention |
+| **Notification Center** | Content pending approval, new assignments, subjective answers to evaluate, reassignment updates |
+
+### 8.5 Tutor Feedback System
+- **Personalized feedback** to students
+- **Recommendations and study plans**
+- **Tutor Reports to Students**: Structured performance summary, strengths, weak areas, recommended study plan
+- **Student Feedback on Tutor**: Ratings + written feedback, rolls up to Principal Module
+
+### 8.6 Intelligent Tutor Matching
+AI assigns tutors using 4 weighted criteria: Academic (subject expertise), Language, Regional, Cultural
+
+### 8.7 Tutor Reassignment
+Tutor may request reassignment with reason; requires Principal approval
+
+---
+
+## 9. Principal Module (Expanded)
+
+### 9.1 Dashboard — Institution-Wide Visibility
+
+| Student Visibility | All students, activity, AI analytics — regardless of assigned tutor |
+|-------------------|----------------------------------------------------------------------|
+| **Tutor Visibility** | All tutors' profiles, performance, content-review activity, student feedback ratings |
+| **Platform Analytics** | Usage reports, institution-level learning outcomes |
+
+### 9.2 Notification & Approval Center
+Tutor approvals (post AI-verification), reassignment requests, escalations, content/quality flags, low student-feedback alerts
+
+### 9.3 Responsibilities
+Academic governance (monitor tutors, review content, resolve issues), Quality assurance (approve escalations, maintain standards)
+
+---
+
+## 10. Super Admin Module (Expanded)
+
+### 10.1 Dashboard — Platform-Wide
+Sees everything visible to every other role — all students, all tutors, all principals, all activity, all AI analytics across every institution
+
+### 10.2 Notification & Approval Center
+Final-stage tutor approvals, escalated items, platform-wide content alerts, AI recommendations requiring governance, compliance exceptions
+
+### 10.3 User Management
+Manage Principals, Tutors, Students directly
+
+### 10.4 Organization Analytics
+Total users, engagement, content performance, learning outcomes
+
+---
+
+## 11. AI Analytics & Reporting
+
+| Report Type | Content |
+|-------------|---------|
+| **Student Reports** | Progress, performance, personalized recommendations |
+| **Tutor Reports** | Student outcomes, engagement under mentorship |
+| **Principal Reports** | Institution-level performance summaries |
+| **Super Admin Reports** | Organization-wide analytics |
+
+---
+
+## 12. Future Enhancements (Phase 2)
+Live AI avatar tutor, Real-time classroom, Parent dashboard, Multi-school support, Learning marketplace, Career guidance AI, Emotional learning analytics, Offline mobile learning

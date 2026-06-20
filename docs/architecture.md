@@ -1,261 +1,119 @@
-# System Architecture — VidyaMitra AI Student Tutor Platform v2.0
+# System Architecture — AI Student Tutor Platform v2.1
 
-> **Date:** 2026-06-19 | **Version:** 2.0 | **Author:** WorkCore (Architect)
+> **Date:** 2026-06-20 | **Version:** 2.1 (Revised) | **Source:** Functional Specification V1
 
 ---
 
-## 1. High-Level Architecture
+## 1. Key Architectural Changes (v2.1)
+
+| Change | Detail |
+|--------|--------|
+| **Notification Centers** | Every role (Tutor, Principal, Admin) has dedicated notification + approval centers with actionable links |
+| **Tutor Analytics per Student** | Interest areas, time spent, learning patterns, knowledge retention per assigned student |
+| **Student Feedback on Tutors** | Ratings + written feedback rolled up to Principal Module |
+| **Tutor Reports to Students** | Structured reports with performance summary + study plan recommendations |
+| **Principal Institution-Wide Visibility** | Sees ALL students and ALL tutors, not just assigned subset |
+| **Super Admin Platform-Wide** | Sees everything across all institutions |
+
+---
+
+## 2. Notification & Approval Flow Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        CLIENT LAYER                              │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────────┐  │
-│  │ Student   │ │ Tutor    │ │ Principal│ │ Super Admin      │  │
-│  │ Portal    │ │ Portal   │ │ Portal   │ │ Portal           │  │
-│  │ Next.js   │ │ Next.js  │ │ Next.js  │ │ Next.js          │  │
-│  └────┬─────┘ └────┬─────┘ └────┬─────┘ └────────┬─────────┘  │
-└───────┼────────────┼────────────┼─────────────────┼────────────┘
-        │            │            │                 │
-        ▼            ▼            ▼                 ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                        API GATEWAY                               │
-│  Nginx (TLS 1.3) → FastAPI (Uvicorn Workers) → WebSocket       │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────┐      │
-│  │ Auth     │ │ Rate     │ │ Content  │ │ Notification │      │
-│  │ (JWT+R)  │ │ Limiter  │ │ CDN      │ │ Hub          │      │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────────┘      │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      SERVICE LAYER                               │
+│                    NOTIFICATION CENTERS                           │
 │                                                                  │
-│  Student       Tutor        Principal     Admin                │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐         │
-│  │ Learning │ │ Content  │ │ Monitor  │ │Governance│         │
-│  │ Profile  │ │ Review   │ │ Service  │ │ Service  │         │
-│  │ Service  │ │ Service  │ │          │ │          │         │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘         │
+│  Tutor Notification Center                                       │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │ • Content pending approval (Approve/Reject/Modify)        │   │
+│  │ • New student assignments requiring acknowledgment        │   │
+│  │ • Subjective answers awaiting evaluation                  │   │
+│  │ • Reassignment request status updates                     │   │
+│  │ [Each links directly to relevant action screen]           │   │
+│  └──────────────────────────────────────────────────────────┘   │
 │                                                                  │
-│  Shared Services                                                │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐         │
-│  │ Content  │ │Assessment│ │ Analytics│ │ Voice    │         │
-│  │ Generator│ │ Engine   │ │ Engine   │ │ Service  │         │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘         │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                       AI AGENT LAYER (12 Agents)                 │
+│  Principal Notification & Approval Center                        │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │ • Tutor approvals after AI Verification                   │   │
+│  │ • Tutor reassignment requests                             │   │
+│  │ • Escalations raised by tutors or students                │   │
+│  │ • Content/quality flags requiring review                   │   │
+│  │ • Low student-feedback alerts on tutor performance        │   │
+│  └──────────────────────────────────────────────────────────┘   │
 │                                                                  │
-│  LangGraph Orchestrator ← Model Router                          │
-│  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐       │
-│  │Teacher│ │Assess│ │Curric│ │Content│ │Person│ │Video │       │
-│  │Agent  │ │Agent │ │Agent │ │Gen    │ │alize │ │Gen   │       │
-│  └──────┘ └──────┘ └──────┘ └──────┘ └──────┘ └──────┘       │
-│  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐       │
-│  │Verify│ │Match │ │Analy │ │Motiv │ │Voice │ │Report│       │
-│  │Agent │ │Agent │ │tics  │ │Agent │ │Agent │ │Agent │       │
-│  └──────┘ └──────┘ └──────┘ └──────┘ └──────┘ └──────┘       │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                       DATA LAYER                                 │
-│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐            │
-│  │ PostgreSQL   │ │ Redis        │ │ Qdrant       │            │
-│  │ (Primary)    │ │ (Cache/Sess) │ │ (Vector DB)  │            │
-│  └──────────────┘ └──────────────┘ └──────────────┘            │
-│  ┌──────────────┐ ┌──────────────┐                              │
-│  │ MinIO/S3     │ │ RabbitMQ     │                              │
-│  │ (File Store) │ │ (Async Tasks)│                              │
-│  └──────────────┘ └──────────────┘                              │
+│  Super Admin Notification & Approval Center                      │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │ • Final-stage tutor approvals (after Principal Review)    │   │
+│  │ • Escalations flagged upward by Principals                │   │
+│  │ • Platform-wide content alerts                            │   │
+│  │ • AI recommendations requiring governance sign-off        │   │
+│  │ • Compliance and policy exceptions                        │   │
+│  └──────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 2. Role-Based Portal Architecture
+## 3. Student Feedback Flow
 
 ```
-┌──────────────────────────────────────────────────────────┐
-│                    FRONTEND (Next.js)                      │
-│                                                            │
-│  /student/*     /tutor/*      /principal/*   /admin/*     │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐ │
-│  │Dashboard │  │Dashboard │  │Dashboard │  │Dashboard │ │
-│  │Learning  │  │Content   │  │Tutors    │  │Users     │ │
-│  │Chat      │  │Review    │  │Students  │  │Principals│ │
-│  │Practice  │  │Students  │  │Reports   │  │Analytics │ │
-│  │Progress  │  │Feedback  │  │Escalate  │  │Approve   │ │
-│  │Profile   │  │Profile   │  │Profile   │  │Settings  │ │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────┘ │
-└──────────────────────────────────────────────────────────┘
-```
-
----
-
-## 3. Content Generation Pipeline
-
-```
-┌─────────────────────────────────────────────────────────┐
-│               CONTENT GENERATION PIPELINE                 │
-│                                                          │
-│  Admin Upload (PDF/Notes)                               │
-│       │                                                  │
-│       ▼                                                  │
-│  ┌──────────────┐                                       │
-│  │ Step 1:      │  Extract text, images, structure      │
-│  │ Content      │  from PDF using OCR + parsing         │
-│  │ Extraction   │                                       │
-│  └──────┬───────┘                                       │
-│         │                                                │
-│         ▼                                                │
-│  ┌──────────────┐                                       │
-│  │ Step 2:      │  Generate embeddings                  │
-│  │ Embeddings   │  Store in Qdrant vector DB            │
-│  └──────┬───────┘                                       │
-│         │                                                │
-│         ▼                                                │
-│  ┌──────────────┐                                       │
-│  │ Step 3:      │  AI generates:                        │
-│  │ Lesson       │  • Lesson plans                       │
-│  │ Generation   │  • Chapter summaries                  │
-│  │              │  • Topic explanations                 │
-│  │              │  • Examples & exercises               │
-│  └──────┬───────┘                                       │
-│         │                                                │
-│         ▼                                                │
-│  ┌──────────────┐                                       │
-│  │ Step 4:      │  AI generates:                        │
-│  │ Video &      │  • Animated concept videos            │
-│  │ Voice Gen    │  • Regional language narration        │
-│  │              │  • Visual demonstrations              │
-│  └──────┬───────┘                                       │
-│         │                                                │
-│         ▼                                                │
-│  ┌──────────────┐                                       │
-│  │ Step 5:      │  Adapt for: language, region,         │
-│  │ Personalize  │  culture, grade level, interests      │
-│  └──────┬───────┘                                       │
-│         │                                                │
-│         ▼                                                │
-│  ┌──────────────┐                                       │
-│  │ Step 6:      │  Tutor reviews → Approve/Modify/     │
-│  │ Tutor        │  Reject → Published to knowledge      │
-│  │ Validation   │  base                                 │
-│  └──────────────┘                                       │
-└─────────────────────────────────────────────────────────┘
+Student completes learning session
+  │
+  ▼
+Student submits feedback on Tutor
+  (Rating + Written Comments)
+  │
+  ▼
+Feedback stored in student_feedback table
+  │
+  ▼
+Aggregated & displayed on:
+  ├── Tutor Dashboard (personal view)
+  ├── Principal Dashboard (all tutors' feedback)
+  └── Super Admin Dashboard (platform-wide)
 ```
 
 ---
 
-## 4. Assessment Engine Architecture
+## 4. Tutor Report Flow
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                  ASSESSMENT ENGINE                        │
-│                                                          │
-│  Objective Questions          Subjective Questions       │
-│  ┌──────────────────┐       ┌──────────────────────┐   │
-│  │ • MCQ            │       │ • Student writes on   │   │
-│  │ • Fill in blanks │       │   paper              │   │
-│  │ • Match columns  │       │ • Draws diagrams     │   │
-│  │ • True/False     │       │ • Uploads image      │   │
-│  │                  │       │                      │   │
-│  │ Auto-graded by   │       │ AI processes:        │   │
-│  │ SymPy + rule     │       │ • OCR handwriting    │   │
-│  │ engine           │       │ • Diagram analysis   │   │
-│  └──────────────────┘       │ • Content evaluation │   │
-│                              │ • Auto-scoring       │   │
-│                              └──────────────────────┘   │
-│                                                          │
-│  Teacher Review: Tutor feedback alongside AI feedback    │
-└─────────────────────────────────────────────────────────┘
+Tutor creates report for Student
+  │  Performance summary
+  │  Strengths
+  │  Weak areas
+  │  Recommended study plan
+  ▼
+Report sent to Student
+  │  Visible on Student Dashboard
+  │  Notification triggered
+  ▼
+Report stored in tutor_reports table
+  │  Tracked in analytics
 ```
 
 ---
 
-## 5. Tutor Approval Workflow
+## 5. Updated Notification Types
 
-```
-Tutor Registration
- │  Submit: personal info, subjects, experience, degrees, certs
- ▼
-AI Verification Agent
- │  Auto-verify: documents, qualifications, consistency
- │  Generate: verification report
- ▼
-Principal Review
- │  Review: AI report, documents, suitability
- ▼
-Super Admin Approval
- │  Final approval
- ▼
-Tutor Activated
- │  Access: dashboard, students, content validation
-```
-
----
-
-## 6. Technology Stack (v2.0)
-
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| **Frontend** | Next.js 15, TypeScript, Tailwind CSS | Role-based portals |
-| **Backend** | FastAPI (Python 3.12), Uvicorn | REST + WebSocket API |
-| **AI Framework** | LangGraph | 12-agent orchestration |
-| **Primary DB** | PostgreSQL 16 | Relational data |
-| **Cache** | Redis 7 | Sessions, rate limiting |
-| **Vector DB** | Qdrant | Content embeddings, RAG |
-| **File Storage** | MinIO / S3 | PDFs, images, videos |
-| **Async Tasks** | RabbitMQ / Celery | Content generation, video rendering |
-| **Container** | Docker + Compose | Local dev, CI/CD |
-| **Monitoring** | Langfuse + Prometheus + Grafana | LLM tracing + metrics |
-| **STT** | OpenAI Whisper | Voice input |
-| **TTS** | ElevenLabs / Azure / OpenAI | Voice output |
-| **OCR** | Tesseract / Azure Vision | Handwriting recognition |
-| **Video** | Remotion / RunwayML | AI video generation |
-| **Auth** | JWT (Access + Refresh) + Google OAuth | Multi-role auth |
-
----
-
-## 7. Database Schema (New Tables)
-
-| Table | Purpose |
-|-------|---------|
-| `tutors` | Tutor profiles, subjects, experience |
-| `tutor_documents` | Qualification documents, verification status |
-| `principals` | Principal profiles, institution |
-| `content_lessons` | AI-generated lessons |
-| `content_videos` | AI-generated videos |
-| `content_reviews` | Tutor content validation records |
-| `assessments` | Extended: MCQ, subjective, image-based |
-| `assessment_results` | Per-question results with AI + tutor feedback |
-| `curriculum_nodes` | Subject → Chapter → Topic hierarchy |
-| `notifications` | System-wide notification center |
-| `approval_workflows` | Multi-step approval tracking |
-
----
-
-## 8. API Endpoints (v2.0 — New)
-
-| Endpoint | Role | Purpose |
-|----------|------|---------|
-| `POST /auth/register` | All | Multi-role registration |
-| `POST /tutor/register` | Tutor | Submit profile + documents |
-| `POST /tutor/verify` | AI | AI verification of documents |
-| `GET /tutor/dashboard` | Tutor | Student analytics view |
-| `POST /content/upload` | Admin | Upload PDF/notes |
-| `POST /content/generate` | AI | Generate lessons from PDF |
-| `POST /content/review` | Tutor | Approve/modify/reject content |
-| `GET /content/lessons` | Student | Personalized lesson feed |
-| `POST /assessment/subjective` | Student | Upload handwritten answer |
-| `POST /assessment/evaluate` | AI | OCR + evaluate answer |
-| `GET /principal/dashboard` | Principal | Institution-wide view |
-| `GET /admin/dashboard` | Admin | Organization-wide analytics |
-| `POST /admin/approve` | Admin | Approve tutor/content |
-| `POST /tutor/feedback` | Tutor | Submit student feedback |
+| Type | Sent To | Trigger |
+|------|---------|---------|
+| `content_pending` | Tutor | AI content generated, awaiting review |
+| `student_assigned` | Tutor | New student added to roster |
+| `subjective_pending` | Tutor | Subjective answer submitted, needs evaluation |
+| `reassignment_update` | Tutor | Reassignment request status changed |
+| `tutor_approval` | Principal | Tutor passed AI verification, needs review |
+| `reassignment_request` | Principal | Tutor requested reassignment |
+| `escalation` | Principal | Issue escalated by tutor/student |
+| `quality_flag` | Principal | Content or quality concern flagged |
+| `low_feedback_alert` | Principal | Tutor received low student ratings |
+| `final_approval` | Admin | Tutor approved by Principal, needs final sign-off |
+| `escalated_upward` | Admin | Escalation from Principal |
+| `content_alert` | Admin | Platform-wide content issue |
+| `ai_recommendation` | Admin | AI governance recommendation |
+| `compliance_exception` | Admin | Policy exception requiring review |
+| `report_ready` | Student | Tutor report available |
+| `feedback_response` | Tutor | Student submitted feedback |
 
 ---
 
